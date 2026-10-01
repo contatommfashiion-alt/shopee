@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { apiErrorMessage } from "@/lib/api-errors";
 import { parseCredentials } from "@/lib/credentials";
 import { ShopeeClientError, fetchProductOffers } from "@/lib/shopee";
+import { PRODUCT_OFFER_MAX_LIMIT } from "@/lib/shopee-query";
+import type { ProductOfferParams } from "@/lib/shopee-query";
 import type {
   ApiErrorCode,
   OffersErrorPayload,
@@ -12,24 +14,25 @@ import type {
 /**
  * /api/offers
  *
- * browser -> this handler -> Shopee Affiliate Open API -> normalization -> JSON
+ * navegador -> este handler -> Shopee Affiliate Open API -> normalização -> JSON
  *
- * GET  uses the credentials configured on the server (`.env.local` / Vercel).
- *      Preferred path: the Secret never travels through the browser.
+ * Parâmetros (query string no GET, corpo no POST):
+ *   productCatId  opcional, nicho (categoria de nível 1) — ver `lib/categories.ts`
+ *   limit         opcional, teto de 50 aplicado pela Shopee
  *
- * POST accepts credentials in the JSON body, for the credentials screen. They
- *      are used to sign that single request and then discarded — never written
- *      to disk, never logged, never echoed back. The body (not the query
- *      string) carries them so the Secret cannot end up in an access log.
+ * GET  usa as credenciais configuradas no servidor (`.env.local` / Vercel).
+ *      Caminho preferido: o Secret nunca passa pelo navegador.
+ * POST aceita as credenciais no corpo, para a tela de login. Elas assinam uma
+ *      requisição e são descartadas — nunca gravadas, logadas ou devolvidas. O
+ *      corpo (não a query string) as carrega para não irem parar em log.
  *
- * Nothing is persisted and nothing is cached in either case.
+ * Nada é persistido e nada é cacheado.
  */
 
 export const dynamic = "force-dynamic";
 
 const NO_STORE = { "Cache-Control": "no-store" } as const;
 
-/** HTTP status for each failure mode. */
 function statusForCode(code: ApiErrorCode): number {
   switch (code) {
     case "MISSING_CONFIG":
@@ -55,19 +58,33 @@ function errorResponse(code: ApiErrorCode): NextResponse<OffersErrorPayload> {
   );
 }
 
-/** Shared tail of both handlers. */
+/** Lê o nicho e o limite. Valores inválidos viram "sem filtro", não erro. */
+function readOfferParams(source: Record<string, unknown>): ProductOfferParams {
+  const rawCat = Number(source.productCatId);
+  const productCatId = Number.isFinite(rawCat) && rawCat > 0 ? Math.trunc(rawCat) : null;
+
+  const rawLimit = Number(source.limit);
+  const limit =
+    Number.isFinite(rawLimit) && rawLimit > 0
+      ? Math.min(Math.trunc(rawLimit), PRODUCT_OFFER_MAX_LIMIT)
+      : PRODUCT_OFFER_MAX_LIMIT;
+
+  return { productCatId, limit };
+}
+
 async function respondWithOffers(
+  params: ProductOfferParams,
   credentials?: ShopeeCredentials,
 ): Promise<NextResponse<OffersPayload | OffersErrorPayload>> {
   try {
-    const payload = await fetchProductOffers(credentials);
+    const payload = await fetchProductOffers(params, credentials);
 
     return NextResponse.json(payload, { headers: NO_STORE });
   } catch (error) {
     const code: ApiErrorCode = error instanceof ShopeeClientError ? error.code : "UPSTREAM_ERROR";
 
-    // The reason stays in the server log. It is built from the upstream message
-    // and the env var NAMES only — it can never contain the Secret.
+    // A razão detalhada fica no log do servidor. O navegador recebe só o
+    // código estável e o texto amigável.
     console.error(
       "[api/offers] falha ao consultar productOfferV2:",
       code,
@@ -78,12 +95,21 @@ async function respondWithOffers(
   }
 }
 
-/** Offers using the server-side credentials. */
-export async function GET(): Promise<NextResponse<OffersPayload | OffersErrorPayload>> {
-  return respondWithOffers();
+/** Ofertas usando as credenciais do servidor. */
+export async function GET(
+  request: Request,
+): Promise<NextResponse<OffersPayload | OffersErrorPayload>> {
+  const search = new URL(request.url).searchParams;
+
+  return respondWithOffers(
+    readOfferParams({
+      productCatId: search.get("productCatId"),
+      limit: search.get("limit"),
+    }),
+  );
 }
 
-/** Offers using the credentials typed into the credentials screen. */
+/** Ofertas usando as credenciais informadas no login. */
 export async function POST(
   request: Request,
 ): Promise<NextResponse<OffersPayload | OffersErrorPayload>> {
@@ -94,7 +120,9 @@ export async function POST(
     return errorResponse("MISSING_CONFIG");
   }
 
-  const parsed = parseCredentials(body, process.env.NODE_ENV === "production");
+  const source = (body ?? {}) as Record<string, unknown>;
+
+  const parsed = parseCredentials(source, process.env.NODE_ENV === "production");
 
   if (!parsed.ok) {
     if (parsed.reason === "invalidUrl") return errorResponse("INVALID_API_URL");
@@ -102,5 +130,5 @@ export async function POST(
     return errorResponse("MISSING_CONFIG");
   }
 
-  return respondWithOffers(parsed.credentials);
+  return respondWithOffers(readOfferParams(source), parsed.credentials);
 }

@@ -47,21 +47,14 @@ function toRate(value: unknown): number | null {
 /**
  * Normalizes `priceDiscountRate` to a percentage in the 0-100 range.
  *
- * The semantics of this field are NOT documented in the material we have, and
- * it arrives as a bare number/string. This heuristic is isolated here, on
- * purpose, so there is a single place to fix once the real contract is known.
+ * A introspecção do schema confirmou o tipo: `priceDiscountRate: Int!`. Sendo
+ * inteiro, `35` significa 35% — não existe a forma fracionária `0.35`. A
+ * conversão de fração continua aqui só como defesa: se o campo chegar como
+ * string decimal em algum caso, vira percentual em vez de sumir.
  *
- * ASSUMPTION:
- *   - `value > 1`       -> already a percentage: `35`     -> 35%
- *   - `0 < value < 1`   -> a fraction:           `"0.35"` -> 35%
- *   - `value === 1`     -> AMBIGUOUS (1% or 100%). Read as 1%, the conservative
- *                          choice: understating a discount is harmless, while
- *                          advertising a fake "100% OFF" is not.
- *   - `value <= 0`, unparseable or `> 100` -> `null` (no discount badge is shown)
- *
- * TODO: confirm the real unit of `priceDiscountRate` against the official
- * Shopee Affiliate documentation (or by comparing `price` with `priceMin`/
- * `priceMax` on a known offer) and then delete this heuristic.
+ *   - `value >= 1`     -> já é percentual: `35` -> 35%
+ *   - `0 < value < 1`  -> fração defensiva:  `"0.35"` -> 35%
+ *   - `value <= 0`, inválido ou `> 100` -> `null` (nenhum selo é exibido)
  */
 export function normalizeDiscountRate(value: unknown): number | null {
   const parsed = toNumber(value);

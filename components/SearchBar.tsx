@@ -30,7 +30,7 @@ export default function SearchBar({ value, onChange }: SearchBarProps) {
         onChange={(event) => onChange(event.target.value)}
         placeholder="Buscar produto..."
         aria-label="Buscar produto entre as ofertas carregadas"
-        className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pr-11 pl-12 text-base text-slate-900 shadow-sm transition placeholder:text-slate-400 hover:border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+        className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pr-11 pl-12 text-base text-slate-900 shadow-sm transition placeholder:text-slate-400 hover:border-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
       />
 
       {value !== "" ? (

@@ -141,11 +141,12 @@ test("normalizeProducts drops unusable nodes and tolerates a missing list", () =
 });
 
 test("normalizeDiscountRate applies the documented heuristic", () => {
+  // O schema confirma `priceDiscountRate: Int!`, então 35 = 35%.
   assert.equal(normalizeDiscountRate(35), 35);
   assert.equal(normalizeDiscountRate("35"), 35);
+  // Conversão defensiva, caso chegue como decimal em algum caso.
   assert.equal(normalizeDiscountRate(0.35), 35);
   assert.equal(normalizeDiscountRate("0.35"), 35);
-  // Documented ambiguity: 1 is read as 1%, the conservative choice.
   assert.equal(normalizeDiscountRate(1), 1);
   assert.equal(normalizeDiscountRate(100), 100);
   assert.equal(normalizeDiscountRate(0), null);

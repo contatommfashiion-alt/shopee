@@ -107,7 +107,7 @@ export default function AdvancedFilters({ value, onApply, onClear }: AdvancedFil
           <SlidersHorizontal className="h-4 w-4 text-slate-500" aria-hidden="true" />
           Filtros avançados
           {activeCount > 0 ? (
-            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800">
+            <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-bold text-brand-800">
               {activeCount}
             </span>
           ) : null}
@@ -140,7 +140,7 @@ export default function AdvancedFilters({ value, onApply, onClear }: AdvancedFil
                   onChange={(event) =>
                     setDraft((previous) => ({ ...previous, [field.key]: event.target.value }))
                   }
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
                 />
               </div>
             ))}
@@ -149,7 +149,7 @@ export default function AdvancedFilters({ value, onApply, onClear }: AdvancedFil
           <div className="mt-4 flex gap-2">
             <button
               type="submit"
-              className="flex-1 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-700 active:bg-emerald-800"
+              className="flex-1 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700 active:bg-brand-800"
             >
               APLICAR FILTROS
             </button>

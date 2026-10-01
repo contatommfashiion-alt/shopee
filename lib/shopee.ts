@@ -1,6 +1,8 @@
 import { normalizePageInfo, normalizeProducts } from "./normalize";
 import { createShopeeAuthorization } from "./shopee-auth";
 import { readShopeeEnv } from "./env";
+import { buildProductOfferQuery } from "./shopee-query";
+import type { ProductOfferParams } from "./shopee-query";
 import type {
   ApiErrorCode,
   OffersPayload,
@@ -11,50 +13,6 @@ import type {
 
 /** SERVER ONLY. This module handles the Secret and must never be imported by a Client Component. */
 
-/**
- * The exact query confirmed to work on Shopee's official GraphiQL.
- *
- * No arguments are passed: `productOfferV2` is called bare, as confirmed.
- *
- * TODO: once the official schema for `productOfferV2` arguments is confirmed
- * (keyword / category / sort / page / limit), add them here and move search,
- * sorting and pagination from the browser to the server. The UI already funnels
- * everything through `GET /api/offers`, so only this file and the route handler
- * change.
- */
-export const PRODUCT_OFFER_QUERY = `{
-  productOfferV2 {
-    nodes {
-      productName
-      itemId
-      commissionRate
-      commission
-      price
-      sales
-      imageUrl
-      shopName
-      productLink
-      offerLink
-      periodStartTime
-      periodEndTime
-      priceMin
-      priceMax
-      productCatIds
-      ratingStar
-      priceDiscountRate
-      shopId
-      shopType
-      sellerCommissionRate
-      shopeeCommissionRate
-    }
-    pageInfo {
-      page
-      limit
-      hasNextPage
-      scrollId
-    }
-  }
-}`;
 
 const REQUEST_TIMEOUT_MS = 10_000;
 
@@ -88,9 +46,17 @@ function codeForHttpStatus(status: number): ApiErrorCode {
  */
 function codeForGraphQLErrors(messages: string[]): ApiErrorCode {
   const haystack = messages.join(" ").toLowerCase();
-  const authHints = ["signature", "assinatura", "credential", "unauthor", "auth", "app id", "appid", "timestamp"];
+
+  // Confirmado contra o endpoint: a conversionReport recusa janelas maiores que
+  // 3 meses com esta mensagem (erro 11001).
+  if (haystack.includes("last 3 months")) return "WINDOW_TOO_OLD";
+
+  const authHints = ["signature", "assinatura", "credential", "unauthor", "auth", "app id", "appid"];
 
   if (authHints.some((hint) => haystack.includes(hint))) return "INVALID_CREDENTIALS";
+
+  // "Timestamp unit is seconds" é erro nosso, não de credencial: cai no genérico.
+  if (haystack.includes("timestamp") && !haystack.includes("unit")) return "INVALID_CREDENTIALS";
 
   return "UPSTREAM_ERROR";
 }
@@ -105,38 +71,44 @@ function collectErrorMessages(response: ShopeeGraphQLResponse<unknown>): string[
 }
 
 /**
- * Runs the confirmed `productOfferV2` query and returns normalized products.
+ * Credentials for one request: the ones typed on the login screen, or the
+ * server environment when none were given.
  *
- * `credentials` comes from the credentials screen, for one request only. When
- * it is omitted the server environment is used, which is the preferred path:
- * the Secret then never travels through the browser.
+ * The environment path is preferred: the Secret then never travels through the
+ * browser. Either way nothing is persisted and the Secret is never logged.
+ */
+function resolveCredentials(credentials?: ShopeeCredentials): ShopeeCredentials {
+  if (credentials) return credentials;
+
+  const envResult = readShopeeEnv();
+  if (!envResult.ok) {
+    throw new ShopeeClientError(
+      "MISSING_CONFIG",
+      `Variáveis de ambiente ausentes: ${envResult.missing.join(", ")}`,
+    );
+  }
+
+  return envResult.env;
+}
+
+/**
+ * Signs and runs one GraphQL query against the Shopee endpoint.
  *
- * Either way nothing is persisted and the Secret is never logged.
+ * Shared by every operation (`productOfferV2`, `conversionReport`), so the
+ * signing code exists in exactly one place.
  *
  * Throws `ShopeeClientError` — the route handler turns it into a friendly JSON
  * body. Raw upstream text stays on the server.
  */
-export async function fetchProductOffers(credentials?: ShopeeCredentials): Promise<OffersPayload> {
-  let resolved: ShopeeCredentials;
-
-  if (credentials) {
-    resolved = credentials;
-  } else {
-    const envResult = readShopeeEnv();
-    if (!envResult.ok) {
-      throw new ShopeeClientError(
-        "MISSING_CONFIG",
-        `Variáveis de ambiente ausentes: ${envResult.missing.join(", ")}`,
-      );
-    }
-    resolved = envResult.env;
-  }
-
-  const { appId, secret, apiUrl } = resolved;
+export async function runGraphQL<TData>(
+  query: string,
+  credentials?: ShopeeCredentials,
+): Promise<TData> {
+  const { appId, secret, apiUrl } = resolveCredentials(credentials);
 
   // Serialize ONCE. The signature is computed over this exact string and the
   // very same string is sent as the body — no second JSON.stringify, no edits.
-  const requestBody = { query: PRODUCT_OFFER_QUERY };
+  const requestBody = { query };
   const payload = JSON.stringify(requestBody);
 
   const { authorization } = createShopeeAuthorization(appId, secret, payload);
@@ -175,9 +147,9 @@ export async function fetchProductOffers(credentials?: ShopeeCredentials): Promi
     );
   }
 
-  let parsed: ShopeeGraphQLResponse<ShopeeProductOfferData>;
+  let parsed: ShopeeGraphQLResponse<TData>;
   try {
-    parsed = (await httpResponse.json()) as ShopeeGraphQLResponse<ShopeeProductOfferData>;
+    parsed = (await httpResponse.json()) as ShopeeGraphQLResponse<TData>;
   } catch {
     throw new ShopeeClientError("INVALID_RESPONSE", "A Shopee não respondeu um JSON válido.");
   }
@@ -190,7 +162,24 @@ export async function fetchProductOffers(credentials?: ShopeeCredentials): Promi
     );
   }
 
-  const offer = parsed.data?.productOfferV2;
+  if (!parsed.data || typeof parsed.data !== "object") {
+    throw new ShopeeClientError("INVALID_RESPONSE", "A resposta da Shopee não contém dados.");
+  }
+
+  return parsed.data;
+}
+
+/** Runs the confirmed `productOfferV2` query and returns normalized products. */
+export async function fetchProductOffers(
+  params: ProductOfferParams = {},
+  credentials?: ShopeeCredentials,
+): Promise<OffersPayload> {
+  const data = await runGraphQL<ShopeeProductOfferData>(
+    buildProductOfferQuery(params),
+    credentials,
+  );
+
+  const offer = data.productOfferV2;
   if (!offer || typeof offer !== "object") {
     throw new ShopeeClientError("INVALID_RESPONSE", "A resposta não contém productOfferV2.");
   }

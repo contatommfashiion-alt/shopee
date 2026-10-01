@@ -8,13 +8,13 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "OfertaZap — Encontre. Compartilhe. Ganhe.",
+  title: "Laranjinha — Encontre. Compartilhe. Ganhe.",
   description:
     "Consulte ofertas da Shopee, monte a mensagem pronta e compartilhe no WhatsApp manualmente.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#047857",
+  themeColor: "#ee4d2d",
 };
 
 export default function RootLayout({

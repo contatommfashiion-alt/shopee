@@ -21,6 +21,11 @@ export const EMPTY_FILTERS: OfferFilters = {
   minCommission: null,
 };
 
+/**
+ * Os rótulos não têm emoji: o ícone fica a cargo de `QuickFilters.tsx`, com os
+ * mesmos ícones de traço usados na navegação. Assim este módulo segue puro,
+ * sem depender de componentes.
+ */
 export interface QuickFilterDefinition {
   id: QuickFilterId;
   label: string;
@@ -33,43 +38,43 @@ export interface QuickFilterDefinition {
 export const QUICK_FILTERS: QuickFilterDefinition[] = [
   {
     id: "offers",
-    label: "🔥 Ofertas",
+    label: "Ofertas",
     match: (product) => product.discountRate !== null && product.discountRate > 0,
     sort: "discount",
   },
   {
     id: "rating",
-    label: "⭐ Bem avaliados",
+    label: "Bem avaliados",
     match: (product) => product.rating !== null && product.rating >= 4.5,
     sort: "rating",
   },
   {
     id: "sales",
-    label: "🛒 Mais vendidos",
+    label: "Mais vendidos",
     match: (product) => product.sales > 0,
     sort: "sales",
   },
   {
     id: "commission",
-    label: "💰 Maior comissão",
+    label: "Maior comissão",
     match: (product) => product.commissionRate !== null && product.commissionRate > 0,
     sort: "commission",
   },
   {
     id: "price20",
-    label: "💸 Até R$20",
+    label: "Até R$ 20",
     match: (product) => product.price > 0 && product.price <= 20,
     sort: "priceAsc",
   },
   {
     id: "price50",
-    label: "💸 Até R$50",
+    label: "Até R$ 50",
     match: (product) => product.price > 0 && product.price <= 50,
     sort: "priceAsc",
   },
   {
     id: "price100",
-    label: "💸 Até R$100",
+    label: "Até R$ 100",
     match: (product) => product.price > 0 && product.price <= 100,
     sort: "priceAsc",
   },

@@ -33,7 +33,7 @@ export default function EmptyState({ filtered, onClearFilters }: EmptyStateProps
         <button
           type="button"
           onClick={onClearFilters}
-          className="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-700 active:bg-emerald-800"
+          className="rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700 active:bg-brand-800"
         >
           LIMPAR FILTROS
         </button>

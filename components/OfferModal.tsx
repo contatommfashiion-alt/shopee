@@ -216,7 +216,7 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
                 ) : null}
 
                 {product.commissionRate !== null && product.commissionRate > 0 ? (
-                  <span className="font-semibold text-emerald-700">
+                  <span className="font-semibold text-brand-700">
                     Comissão {formatPercentage(product.commissionRate)}
                     {product.commission !== null && product.commission > 0
                       ? ` · ~${formatBRL(product.commission)}`
@@ -241,7 +241,7 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
                     key={template.id}
                     className={`cursor-pointer rounded-xl border px-2.5 py-2.5 text-center transition ${
                       selected
-                        ? "border-emerald-600 bg-emerald-50 ring-1 ring-emerald-600"
+                        ? "border-brand-600 bg-brand-50 ring-1 ring-brand-600"
                         : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
@@ -254,7 +254,7 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
                       className="sr-only"
                     />
                     <span
-                      className={`block text-sm font-bold ${selected ? "text-emerald-800" : "text-slate-800"}`}
+                      className={`block text-sm font-bold ${selected ? "text-brand-800" : "text-slate-800"}`}
                     >
                       {template.label}
                     </span>
@@ -280,11 +280,11 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
               readOnly
               value={message}
               rows={12}
-              className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 p-3.5 font-mono text-[13px] leading-relaxed whitespace-pre-wrap text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+              className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 p-3.5 font-mono text-[13px] leading-relaxed whitespace-pre-wrap text-slate-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
             />
           </div>
 
-          <p aria-live="polite" role="status" className="mt-2 min-h-5 text-xs font-semibold text-emerald-700">
+          <p aria-live="polite" role="status" className="mt-2 min-h-5 text-xs font-semibold text-brand-700">
             {status}
           </p>
         </div>
@@ -296,17 +296,17 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50 active:bg-slate-100"
           >
             {copied ? (
-              <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+              <Check className="h-4 w-4 text-brand-600" aria-hidden="true" />
             ) : (
               <Clipboard className="h-4 w-4" aria-hidden="true" />
             )}
-            {copied ? "MENSAGEM COPIADA!" : "📋 COPIAR MENSAGEM"}
+            {copied ? "MENSAGEM COPIADA!" : "COPIAR MENSAGEM"}
           </button>
 
           <button
             type="button"
             onClick={handleWhatsApp}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-700 active:bg-emerald-800"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-brand-700 active:bg-brand-800"
           >
             <Share2 className="h-4 w-4" aria-hidden="true" />
             COMPARTILHAR NO WHATSAPP
@@ -325,7 +325,7 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
           ) : null}
 
           <p className="pt-0.5 text-center text-[11px] leading-snug text-slate-400">
-            Você escolhe a conversa e aperta enviar. O OfertaZap não envia nada automaticamente.
+            Você escolhe a conversa e aperta enviar. A Laranjinha não envia nada automaticamente.
           </p>
         </div>
       </div>

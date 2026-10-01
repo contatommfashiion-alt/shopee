@@ -1,5 +1,5 @@
 /**
- * Types for OfertaZap.
+ * Types for Laranjinha.
  *
  * The `Shopee*` types describe the RAW shape returned by the Shopee Affiliate
  * Open API (GraphQL). The `Product` / `PageInfo` types describe the NORMALIZED
@@ -139,6 +139,8 @@ export type ApiErrorCode =
   | "INVALID_API_URL"
   | "BLOCKED_API_URL"
   | "INVALID_CREDENTIALS"
+  | "WINDOW_TOO_OLD"
+  | "INVALID_PERIOD"
   | "TIMEOUT"
   | "NETWORK"
   | "UPSTREAM_UNAVAILABLE"

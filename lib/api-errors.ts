@@ -22,6 +22,15 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, { title: string; descripti
     description:
       "Por segurança, este servidor só aceita URLs públicas. Endereços locais ou de rede interna são recusados em produção.",
   },
+  WINDOW_TOO_OLD: {
+    title: "Período fora do limite da Shopee",
+    description:
+      "A API de afiliados só devolve conversões dos últimos 3 meses. Escolha um período dentro dessa janela.",
+  },
+  INVALID_PERIOD: {
+    title: "Período inválido",
+    description: "As datas enviadas não formam um intervalo válido. Ajuste o período e tente de novo.",
+  },
   INVALID_CREDENTIALS: {
     title: "Credenciais inválidas",
     description:

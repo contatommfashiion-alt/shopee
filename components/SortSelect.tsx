@@ -29,7 +29,7 @@ export default function SortSelect({ value, onChange, resultCount }: SortSelectP
           id="sort-select"
           value={value}
           onChange={(event) => onChange(event.target.value as SortOption)}
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 shadow-sm transition hover:border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 shadow-sm transition hover:border-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
         >
           {SORT_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>

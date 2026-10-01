@@ -61,9 +61,9 @@ export default function ProductCard({ product, priority = false, onCreateOffer }
         </div>
 
         {hasCommissionRate || hasEstimate ? (
-          <div className="mt-auto rounded-xl bg-emerald-50 px-3 py-2.5">
+          <div className="mt-auto rounded-xl bg-brand-50 px-3 py-2.5">
             {hasCommissionRate ? (
-              <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
+              <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-800">
                 <Wallet className="h-3.5 w-3.5" aria-hidden="true" />
                 Comissão: {formatPercentage(product.commissionRate)}
               </p>
@@ -71,10 +71,10 @@ export default function ProductCard({ product, priority = false, onCreateOffer }
 
             {hasEstimate ? (
               <>
-                <p className="mt-1 text-[11px] leading-tight text-emerald-700">
+                <p className="mt-1 text-[11px] leading-tight text-brand-700">
                   Você pode receber aproximadamente:
                 </p>
-                <p className="text-sm font-bold text-emerald-900">{formatBRL(product.commission)}</p>
+                <p className="text-sm font-bold text-brand-900">{formatBRL(product.commission)}</p>
               </>
             ) : null}
           </div>
@@ -86,7 +86,7 @@ export default function ProductCard({ product, priority = false, onCreateOffer }
           type="button"
           onClick={() => onCreateOffer(product)}
           aria-label={`Criar oferta para ${product.name}`}
-          className="mt-1 w-full rounded-xl bg-emerald-600 px-3 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-700 active:bg-emerald-800"
+          className="mt-1 w-full rounded-xl bg-brand-600 px-3 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700 active:bg-brand-800"
         >
           CRIAR OFERTA
         </button>

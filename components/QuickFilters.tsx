@@ -1,5 +1,6 @@
 "use client";
 
+import { Flame, ShoppingCart, Star, Tag, Wallet, type LucideIcon } from "lucide-react";
 import { QUICK_FILTERS } from "@/lib/filters";
 import type { QuickFilterId } from "@/lib/types";
 
@@ -8,7 +9,23 @@ interface QuickFiltersProps {
   onChange: (id: QuickFilterId | null) => void;
 }
 
-/** One-tap shortcuts. Tapping the active one clears it. */
+/**
+ * Ícones dos atalhos.
+ *
+ * Mesma família de traço da navegação lateral, no lugar dos emojis — assim a
+ * aba inteira lê como um sistema só.
+ */
+const ICONS: Record<QuickFilterId, LucideIcon> = {
+  offers: Flame,
+  rating: Star,
+  sales: ShoppingCart,
+  commission: Wallet,
+  price20: Tag,
+  price50: Tag,
+  price100: Tag,
+};
+
+/** Atalhos de um toque. Tocar no ativo limpa. */
 export default function QuickFilters({ active, onChange }: QuickFiltersProps) {
   return (
     <div
@@ -18,6 +35,7 @@ export default function QuickFilters({ active, onChange }: QuickFiltersProps) {
     >
       {QUICK_FILTERS.map((filter) => {
         const isActive = active === filter.id;
+        const Icon = ICONS[filter.id];
 
         return (
           <button
@@ -25,12 +43,16 @@ export default function QuickFilters({ active, onChange }: QuickFiltersProps) {
             type="button"
             aria-pressed={isActive}
             onClick={() => onChange(isActive ? null : filter.id)}
-            className={`shrink-0 rounded-full border px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition ${
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition ${
               isActive
-                ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
+                ? "border-brand-600 bg-brand-600 text-white shadow-sm"
                 : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
             }`}
           >
+            <Icon
+              className={`h-4 w-4 ${isActive ? "text-white" : "text-slate-400"}`}
+              aria-hidden="true"
+            />
             {filter.label}
           </button>
         );
