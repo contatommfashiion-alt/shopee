@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, Clipboard, ExternalLink, Share2, ShoppingCart, Star, X } from "lucide-react";
 import ProductImage from "./ProductImage";
+import TikTokVideoSearch from "./TikTokVideoSearch";
 import { formatBRL, formatDiscount, formatPercentage, formatRating, formatSales } from "@/lib/format";
 import { DEFAULT_TEMPLATE_ID, MESSAGE_TEMPLATES, buildMessage, buildWhatsAppShareUrl } from "@/lib/message";
 import { getPreferredOfferLink } from "@/lib/offer-link";
@@ -226,6 +227,8 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
               </div>
             </div>
           </div>
+
+          <TikTokVideoSearch key={product.itemId} productName={product.name} />
 
           <fieldset className="mt-5">
             <legend className="text-xs font-bold tracking-wide text-slate-500 uppercase">
