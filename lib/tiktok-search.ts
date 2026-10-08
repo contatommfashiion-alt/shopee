@@ -9,7 +9,11 @@
  * keeps the words that describe the product itself.
  */
 
-const TIKTOK_SEARCH_URL = "https://www.tiktok.com/search/video";
+/**
+ * `/search`, not `/search/video`: on phones TikTok redirects `/search/video`
+ * to the For You feed and the query is lost. `/search` works on both.
+ */
+const TIKTOK_SEARCH_URL = "https://www.tiktok.com/search";
 
 /** Portuguese connectives that never help a search on their own. */
 const STOPWORDS = new Set([

@@ -43,10 +43,10 @@ test("suggests phrases from most to least specific, without repeats", () => {
   assert.deepEqual(buildTikTokSuggestions("Luminária"), ["luminária"]);
 });
 
-test("builds an encoded TikTok video search URL", () => {
+test("builds an encoded TikTok search URL that also works on phones", () => {
   assert.equal(
     buildTikTokSearchUrl("  garrafa   térmica "),
-    "https://www.tiktok.com/search/video?q=garrafa%20t%C3%A9rmica",
+    "https://www.tiktok.com/search?q=garrafa%20t%C3%A9rmica",
   );
   assert.equal(buildTikTokSearchUrl("   "), null);
 });
