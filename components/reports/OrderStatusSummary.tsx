@@ -17,7 +17,7 @@ export default function OrderStatusSummary({ statuses }: OrderStatusSummaryProps
   const total = statuses.reduce((sum, entry) => sum + entry.count, 0);
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-sm border border-slate-200 bg-white p-5 shadow-sm">
       <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900">
         <ListChecks className="h-4 w-4 text-brand-600" aria-hidden="true" />
         Status dos pedidos

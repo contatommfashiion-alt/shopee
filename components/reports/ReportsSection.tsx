@@ -232,7 +232,7 @@ export default function ReportsSection({ credentials }: ReportsSectionProps) {
         type="button"
         onClick={handleReload}
         disabled={busy}
-        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-sm border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
       >
         <RefreshCw className={`h-4 w-4 ${busy ? "animate-spin" : ""}`} aria-hidden="true" />
         Atualizar
@@ -317,7 +317,7 @@ export default function ReportsSection({ credentials }: ReportsSectionProps) {
               type="button"
               onClick={handleLoadMore}
               disabled={loadingMore}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-sm border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loadingMore ? (
                 <>

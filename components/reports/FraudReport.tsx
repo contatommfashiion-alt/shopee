@@ -21,7 +21,7 @@ export default function FraudReport({ entries }: FraudReportProps) {
   if (entries.length === 0) return null;
 
   return (
-    <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+    <section className="rounded-sm border border-amber-200 bg-amber-50 p-5">
       <h3 className="flex items-center gap-2 text-sm font-bold text-amber-900">
         <ShieldAlert className="h-4 w-4 text-amber-700" aria-hidden="true" />
         Registros sinalizados pela Shopee

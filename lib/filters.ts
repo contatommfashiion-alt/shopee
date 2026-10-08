@@ -81,7 +81,8 @@ export const QUICK_FILTERS: QuickFilterDefinition[] = [
 ];
 
 export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: "commission", label: "Maior comissão" },
+  { value: "commission", label: "Maior comissão (R$)" },
+  { value: "commissionRate", label: "Maior comissão (%)" },
   { value: "discount", label: "Maior desconto" },
   { value: "sales", label: "Mais vendidos" },
   { value: "rating", label: "Melhor avaliação" },
@@ -98,26 +99,87 @@ function foldText(value: string): string {
     .trim();
 }
 
-/** Matches the query against product name and shop name. */
-function matchesSearch(product: Product, search: string): boolean {
-  const query = foldText(search);
-  if (query === "") return true;
+/**
+ * Portuguese plural endings (accents already folded) and their singular.
+ * Lets "camisetas" find "camiseta", "botoes" find "botão", "jornais" find
+ * "jornal". The singular query already finds plurals, since it is a substring.
+ */
+const PLURAL_ENDINGS: [RegExp, string][] = [
+  [/oes$/, "ao"],
+  [/aes$/, "ao"],
+  [/ais$/, "al"],
+  [/eis$/, "el"],
+  [/ns$/, "m"],
+  [/es$/, ""],
+  [/s$/, ""],
+];
 
-  const terms = query.split(/\s+/).filter((term) => term !== "");
-  const haystack = `${foldText(product.name)} ${foldText(product.shopName)}`;
+/** The term itself plus its possible singular forms. */
+function termVariants(term: string): string[] {
+  const variants = [term];
+  if (term.length <= 3) return variants;
 
-  return terms.every((term) => haystack.includes(term));
+  for (const [ending, singular] of PLURAL_ENDINGS) {
+    if (ending.test(term)) variants.push(term.replace(ending, singular));
+  }
+
+  return variants;
 }
 
-export function filterProducts(products: readonly Product[], filters: OfferFilters): Product[] {
+function searchTerms(search: string): string[][] {
+  return foldText(search)
+    .split(/\s+/)
+    .filter((term) => term !== "")
+    .map(termVariants);
+}
+
+/** How many search terms appear in the product name or shop name. */
+function searchScore(product: Product, terms: string[][]): number {
+  const haystack = `${foldText(product.name)} ${foldText(product.shopName)}`;
+
+  return terms.filter((variants) => variants.some((variant) => haystack.includes(variant))).length;
+}
+
+/**
+ * Products that contain every search term. When none does, falls back to the
+ * ones sharing the most terms, so "tênis azul" still shows tênis instead of an
+ * empty grid. `partial` tells the screen it is showing that fallback.
+ */
+function searchProducts(products: Product[], search: string): { products: Product[]; partial: boolean } {
+  const terms = searchTerms(search);
+  if (terms.length === 0) return { products, partial: false };
+
+  const scored = products.map((product) => ({ product, score: searchScore(product, terms) }));
+  const best = scored.reduce((max, entry) => Math.max(max, entry.score), 0);
+
+  if (best === 0) return { products: [], partial: false };
+
+  return {
+    products: scored.filter((entry) => entry.score === best).map((entry) => entry.product),
+    partial: best < terms.length,
+  };
+}
+
+export interface FilterResult {
+  products: Product[];
+  /** `true` when no product had every search word and the closest ones are shown. */
+  partialSearch: boolean;
+}
+
+export function filterProducts(products: readonly Product[], filters: OfferFilters): FilterResult {
   const quick = filters.quick ? QUICK_FILTERS.find((entry) => entry.id === filters.quick) : undefined;
 
-  return products.filter((product) => {
-    if (!matchesSearch(product, filters.search)) return false;
+  // A min above the max is a typo, not a request for nothing: swap them.
+  let { minPrice, maxPrice } = filters;
+  if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
+    [minPrice, maxPrice] = [maxPrice, minPrice];
+  }
+
+  const matching = products.filter((product) => {
     if (quick && !quick.match(product)) return false;
 
-    if (filters.minPrice !== null && product.price < filters.minPrice) return false;
-    if (filters.maxPrice !== null && product.price > filters.maxPrice) return false;
+    if (minPrice !== null && product.price < minPrice) return false;
+    if (maxPrice !== null && product.price > maxPrice) return false;
 
     if (filters.minDiscount !== null) {
       if (product.discountRate === null || product.discountRate < filters.minDiscount) return false;
@@ -137,6 +199,10 @@ export function filterProducts(products: readonly Product[], filters: OfferFilte
 
     return true;
   });
+
+  const searched = searchProducts(matching, filters.search);
+
+  return { products: searched.products, partialSearch: searched.partial };
 }
 
 /** Sorts a copy of the list; missing values always sink to the bottom. */
@@ -149,6 +215,8 @@ export function sortProducts(products: readonly Product[], sort: SortOption): Pr
   switch (sort) {
     case "commission":
       return sorted.sort((a, b) => descending(b.commission) - descending(a.commission));
+    case "commissionRate":
+      return sorted.sort((a, b) => descending(b.commissionRate) - descending(a.commissionRate));
     case "discount":
       return sorted.sort((a, b) => descending(b.discountRate) - descending(a.discountRate));
     case "sales":
@@ -168,8 +236,10 @@ export function applyFilters(
   products: readonly Product[],
   filters: OfferFilters,
   sort: SortOption,
-): Product[] {
-  return sortProducts(filterProducts(products, filters), sort);
+): FilterResult {
+  const filtered = filterProducts(products, filters);
+
+  return { ...filtered, products: sortProducts(filtered.products, sort) };
 }
 
 /** True when any filter is narrowing the list (drives the empty state copy). */

@@ -46,7 +46,7 @@ export default function CommissionSummary({ summary, mcnRate, mcnName }: Commiss
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-sm border border-slate-200 bg-white p-5 shadow-sm">
       <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900">
         <Wallet className="h-4 w-4 text-brand-600" aria-hidden="true" />
         Comissões

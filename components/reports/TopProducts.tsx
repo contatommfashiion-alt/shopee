@@ -21,7 +21,7 @@ export default function TopProducts({ products, limit = 10 }: TopProductsProps) 
   const visible = products.slice(0, limit);
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-sm border border-slate-200 bg-white p-5 shadow-sm">
       <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900">
         <Flame className="h-4 w-4 text-rose-500" aria-hidden="true" />
         Produtos mais vendidos
@@ -30,7 +30,7 @@ export default function TopProducts({ products, limit = 10 }: TopProductsProps) 
       <ul className="mt-3 divide-y divide-slate-100">
         {visible.map((product) => (
           <li key={product.itemId} className="flex items-start gap-3 py-3">
-            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-sm bg-slate-100">
               <ProductImage src={product.imageUrl} alt={product.itemName} sizes="56px" />
             </div>
 

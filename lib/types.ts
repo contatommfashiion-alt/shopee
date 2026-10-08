@@ -166,6 +166,7 @@ export type QuickFilterId =
 
 export type SortOption =
   | "commission"
+  | "commissionRate"
   | "discount"
   | "sales"
   | "rating"

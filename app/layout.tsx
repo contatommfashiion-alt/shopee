@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 
-const geist = Geist({
-  variable: "--font-geist-sans",
+/** Roboto é a fonte do site da Shopee. */
+const roboto = Roboto({
+  variable: "--font-roboto",
   subsets: ["latin"],
+  weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
@@ -24,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${geist.variable} font-sans text-slate-900 antialiased`}>{children}</body>
+      <body className={`${roboto.variable} font-sans text-slate-900 antialiased`}>{children}</body>
     </html>
   );
 }

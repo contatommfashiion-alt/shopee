@@ -9,14 +9,14 @@ interface RefundReportProps {
 /** Itens com `refundAmount > 0`. */
 export default function RefundReport({ refunds }: RefundReportProps) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-sm border border-slate-200 bg-white p-5 shadow-sm">
       <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900">
         <Undo2 className="h-4 w-4 text-rose-500" aria-hidden="true" />
         Reembolsos
       </h3>
 
       {refunds.length === 0 ? (
-        <p className="mt-3 rounded-xl bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+        <p className="mt-3 rounded-sm bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
           Nenhum reembolso encontrado.
         </p>
       ) : (

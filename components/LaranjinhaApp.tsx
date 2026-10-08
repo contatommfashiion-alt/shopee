@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Coins } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ShoppingCart } from "lucide-react";
 import AccountSection from "./AccountSection";
 import AppShell, { type Section } from "./AppShell";
 import ErrorState from "./ErrorState";
@@ -10,6 +10,7 @@ import OffersSection from "./OffersSection";
 import ReportsSection from "./reports/ReportsSection";
 import SkeletonGrid from "./SkeletonGrid";
 import { callApi } from "@/lib/api-client";
+import { normalizeKeyword } from "@/lib/shopee-query";
 import {
   describeApiHost,
   isSignedOut,
@@ -55,8 +56,9 @@ const FIXABLE_BY_LOGIN = new Set<ApiErrorCode>([
 async function loadOffers(
   credentials: ShopeeCredentials | null,
   productCatId: number | null = null,
+  keyword = "",
 ): Promise<Outcome> {
-  const result = await callApi<OffersPayload>("/api/offers", credentials, { productCatId });
+  const result = await callApi<OffersPayload>("/api/offers", credentials, { productCatId, keyword });
 
   if (!result.ok) return { kind: "failed", code: result.code };
 
@@ -150,7 +152,7 @@ export default function LaranjinhaApp() {
   const [serverAvailable, setServerAvailable] = useState(false);
   const [draft, setDraft] = useState<ShopeeCredentials>(EMPTY_CREDENTIALS);
   /**
-   * Cosmetic, local label for the sidebar. The confirmed `productOfferV2` query
+   * Cosmetic, local label for the header. The confirmed `productOfferV2` query
    * exposes no account name, so the user supplies one at login.
    *
    * TODO: if an official operation that returns the affiliate account profile
@@ -162,6 +164,12 @@ export default function LaranjinhaApp() {
   const [section, setSection] = useState<Section>("ofertas");
   /** Nicho em uso. Vai na consulta, então trocar busca ofertas novas. */
   const [niche, setNiche] = useState<number | null>(null);
+  /** O que está digitado na busca do cabeçalho; filtra as ofertas já carregadas. */
+  const [search, setSearch] = useState("");
+  /** A busca enviada à Shopee (Enter ou lupa). Vai na consulta, como o nicho. */
+  const [keyword, setKeyword] = useState("");
+  /** Só a resposta da consulta mais recente vale; buscas rápidas não se atropelam. */
+  const latestLoad = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -186,10 +194,17 @@ export default function LaranjinhaApp() {
   }, []);
 
   const runLoad = useCallback(
-    (credentials: ShopeeCredentials | null, nextSession: Session, productCatId: number | null) => {
+    (
+      credentials: ShopeeCredentials | null,
+      nextSession: Session,
+      productCatId: number | null,
+      nextKeyword: string,
+    ) => {
+      const loadId = ++latestLoad.current;
       setBusy(true);
 
-      void loadOffers(credentials, productCatId).then((outcome) => {
+      void loadOffers(credentials, productCatId, nextKeyword).then((outcome) => {
+        if (loadId !== latestLoad.current) return;
         setBusy(false);
 
         const keep = outcome.kind === "ready" || !FIXABLE_BY_LOGIN.has(outcome.code);
@@ -210,9 +225,9 @@ export default function LaranjinhaApp() {
       writeStoredSession({ credentials, displayName: nextDisplayName });
       setSection("ofertas");
 
-      runLoad(credentials, { source: "form", credentials }, niche);
+      runLoad(credentials, { source: "form", credentials }, niche, keyword);
     },
-    [runLoad, niche],
+    [runLoad, niche, keyword],
   );
 
   const handleUseServerCredentials = useCallback(
@@ -220,17 +235,17 @@ export default function LaranjinhaApp() {
       setDisplayName(nextDisplayName);
       setSignedOut(false);
       setSection("ofertas");
-      runLoad(null, { source: "server" }, niche);
+      runLoad(null, { source: "server" }, niche, keyword);
     },
-    [runLoad, niche],
+    [runLoad, niche, keyword],
   );
 
   const handleReload = useCallback(() => {
     if (!session) return;
 
     setView({ status: "loading" });
-    runLoad(session.source === "form" ? session.credentials : null, session, niche);
-  }, [session, runLoad, niche]);
+    runLoad(session.source === "form" ? session.credentials : null, session, niche, keyword);
+  }, [session, runLoad, niche, keyword]);
 
   /** Trocar o nicho refaz a busca na Shopee, não filtra o que já veio. */
   const handleNicheChange = useCallback(
@@ -238,9 +253,27 @@ export default function LaranjinhaApp() {
       setNiche(nextNiche);
       if (!session) return;
 
-      runLoad(session.source === "form" ? session.credentials : null, session, nextNiche);
+      runLoad(session.source === "form" ? session.credentials : null, session, nextNiche, keyword);
     },
-    [session, runLoad],
+    [session, runLoad, keyword],
+  );
+
+  /**
+   * Enter ou lupa: pede à Shopee as ofertas da palavra-chave, dentro do nicho
+   * escolhido. Buscar de novo o mesmo termo não refaz a consulta; vazio volta
+   * para as ofertas gerais.
+   */
+  const handleSearchSubmit = useCallback(
+    (term: string) => {
+      const nextKeyword = normalizeKeyword(term);
+      setSection("ofertas");
+      if (nextKeyword === keyword || !session) return;
+
+      setKeyword(nextKeyword);
+      setView({ status: "loading" });
+      runLoad(session.source === "form" ? session.credentials : null, session, niche, nextKeyword);
+    },
+    [keyword, session, runLoad, niche],
   );
 
   /** Keeps the fields filled in, for fixing a typo or swapping one value. */
@@ -255,6 +288,8 @@ export default function LaranjinhaApp() {
     setSignedOut(true);
     setDraft(EMPTY_CREDENTIALS);
     setDisplayName("");
+    setSearch("");
+    setKeyword("");
     setSession(null);
     setSection("ofertas");
     setView({ status: "login", errorCode: null });
@@ -265,9 +300,9 @@ export default function LaranjinhaApp() {
       <div className="flex min-h-dvh flex-col items-center justify-center gap-3">
         <span
           aria-hidden="true"
-          className="flex h-11 w-11 animate-pulse items-center justify-center rounded-2xl bg-brand-600 text-white"
+          className="flex h-11 w-11 animate-pulse items-center justify-center rounded-sm bg-brand-500 text-white"
         >
-          <Coins className="h-5 w-5" strokeWidth={2.5} />
+          <ShoppingCart className="h-5 w-5" strokeWidth={2.5} />
         </span>
         <p className="text-sm font-medium text-slate-500" role="status">
           Carregando a Laranjinha...
@@ -302,6 +337,9 @@ export default function LaranjinhaApp() {
       appId={appId}
       displayName={displayName}
       offerCount={offerCount}
+      search={search}
+      onSearchChange={setSearch}
+      onSearchSubmit={handleSearchSubmit}
       onLogout={handleLogout}
     >
       {section === "relatorios" ? (
@@ -330,6 +368,10 @@ export default function LaranjinhaApp() {
       ) : (
         <OffersSection
           products={view.products}
+          search={search}
+          keyword={keyword}
+          onSearchChange={setSearch}
+          onSearchSubmit={handleSearchSubmit}
           niche={niche}
           onNicheChange={handleNicheChange}
           loadingNiche={busy}

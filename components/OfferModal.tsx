@@ -161,10 +161,10 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="offer-modal-title"
-        className="oz-panel-in flex max-h-[92dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-h-[90dvh] sm:rounded-3xl"
+        className="oz-panel-in flex max-h-[92dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-lg bg-white shadow-2xl sm:max-h-[90dvh] sm:rounded-sm"
       >
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
-          <h2 id="offer-modal-title" className="text-base font-bold text-slate-900">
+          <h2 id="offer-modal-title" className="text-lg font-medium text-slate-900">
             Criar oferta
           </h2>
 
@@ -181,21 +181,19 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
 
         <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
           <div className="flex gap-3.5">
-            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-sm bg-slate-100">
               <ProductImage src={product.image} alt={product.name} sizes="96px" />
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="line-clamp-2 text-sm leading-snug font-semibold text-slate-900">
-                {product.name}
-              </p>
+              <p className="line-clamp-2 text-sm leading-snug text-slate-900">{product.name}</p>
               <p className="mt-0.5 truncate text-xs text-slate-500">{product.shopName}</p>
 
-              <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                <span className="text-lg font-bold text-slate-900">{formatBRL(product.price)}</span>
+              <div className="mt-1.5 flex flex-wrap items-center gap-2 rounded-sm bg-[#fafafa] px-2 py-1">
+                <span className="text-xl font-medium text-brand-500">{formatBRL(product.price)}</span>
 
                 {product.discountRate !== null && product.discountRate > 0 ? (
-                  <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-700">
+                  <span className="rounded-[2px] bg-brand-600 px-1 py-px text-[11px] font-medium text-white">
                     {formatDiscount(product.discountRate)} OFF
                   </span>
                 ) : null}
@@ -242,10 +240,10 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
                 return (
                   <label
                     key={template.id}
-                    className={`cursor-pointer rounded-xl border px-2.5 py-2.5 text-center transition ${
+                    className={`relative cursor-pointer overflow-hidden rounded-sm border px-2.5 py-2.5 text-center transition ${
                       selected
-                        ? "border-brand-600 bg-brand-50 ring-1 ring-brand-600"
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                        ? "border-brand-500 bg-white"
+                        : "border-slate-200 bg-white hover:border-brand-500"
                     }`}
                   >
                     <input
@@ -256,8 +254,17 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
                       onChange={() => setTemplateId(template.id)}
                       className="sr-only"
                     />
+                    {/* Shopee's selected-variation mark: orange corner with a check. */}
+                    {selected ? (
+                      <span
+                        aria-hidden="true"
+                        className="absolute right-0 bottom-0 flex h-4 w-4 items-end justify-end bg-[linear-gradient(135deg,transparent_50%,var(--color-brand-500)_50%)] p-px text-white"
+                      >
+                        <Check className="h-2 w-2" strokeWidth={4} />
+                      </span>
+                    ) : null}
                     <span
-                      className={`block text-sm font-bold ${selected ? "text-brand-800" : "text-slate-800"}`}
+                      className={`block text-sm font-medium ${selected ? "text-brand-600" : "text-slate-800"}`}
                     >
                       {template.label}
                     </span>
@@ -283,7 +290,7 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
               readOnly
               value={message}
               rows={12}
-              className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 p-3.5 font-mono text-[13px] leading-relaxed whitespace-pre-wrap text-slate-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
+              className="mt-2 w-full resize-none rounded-sm border border-slate-200 bg-[#fafafa] p-3.5 font-mono text-[13px] leading-relaxed whitespace-pre-wrap text-slate-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
             />
           </div>
 
@@ -296,10 +303,10 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
           <button
             type="button"
             onClick={() => void handleCopy()}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50 active:bg-slate-100"
+            className="flex w-full items-center justify-center gap-2 rounded-sm border border-brand-500 bg-brand-50 px-4 py-3 text-sm font-medium text-brand-600 transition hover:bg-brand-100 active:bg-brand-100"
           >
             {copied ? (
-              <Check className="h-4 w-4 text-brand-600" aria-hidden="true" />
+              <Check className="h-4 w-4" aria-hidden="true" />
             ) : (
               <Clipboard className="h-4 w-4" aria-hidden="true" />
             )}
@@ -309,7 +316,7 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
           <button
             type="button"
             onClick={handleWhatsApp}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-brand-700 active:bg-brand-800"
+            className="flex w-full items-center justify-center gap-2 rounded-sm bg-brand-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-brand-700 active:bg-brand-800"
           >
             <Share2 className="h-4 w-4" aria-hidden="true" />
             COMPARTILHAR NO WHATSAPP
@@ -320,7 +327,7 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
               href={preferredLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+              className="flex w-full items-center justify-center gap-2 rounded-sm px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-brand-600"
             >
               <ExternalLink className="h-4 w-4" aria-hidden="true" />
               VER NA SHOPEE

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { apiErrorMessage } from "@/lib/api-errors";
 import { parseCredentials } from "@/lib/credentials";
 import { ShopeeClientError, fetchProductOffers } from "@/lib/shopee";
-import { PRODUCT_OFFER_MAX_LIMIT } from "@/lib/shopee-query";
+import { PRODUCT_OFFER_MAX_LIMIT, normalizeKeyword } from "@/lib/shopee-query";
 import type { ProductOfferParams } from "@/lib/shopee-query";
 import type {
   ApiErrorCode,
@@ -19,6 +19,7 @@ import type {
  * Parâmetros (query string no GET, corpo no POST):
  *   productCatId  opcional, nicho (categoria de nível 1) — ver `lib/categories.ts`
  *   limit         opcional, teto de 50 aplicado pela Shopee
+ *   keyword       opcional, busca por palavra-chave feita pela Shopee
  *
  * GET  usa as credenciais configuradas no servidor (`.env.local` / Vercel).
  *      Caminho preferido: o Secret nunca passa pelo navegador.
@@ -58,7 +59,7 @@ function errorResponse(code: ApiErrorCode): NextResponse<OffersErrorPayload> {
   );
 }
 
-/** Lê o nicho e o limite. Valores inválidos viram "sem filtro", não erro. */
+/** Lê o nicho, o limite e a busca. Valores inválidos viram "sem filtro", não erro. */
 function readOfferParams(source: Record<string, unknown>): ProductOfferParams {
   const rawCat = Number(source.productCatId);
   const productCatId = Number.isFinite(rawCat) && rawCat > 0 ? Math.trunc(rawCat) : null;
@@ -69,7 +70,9 @@ function readOfferParams(source: Record<string, unknown>): ProductOfferParams {
       ? Math.min(Math.trunc(rawLimit), PRODUCT_OFFER_MAX_LIMIT)
       : PRODUCT_OFFER_MAX_LIMIT;
 
-  return { productCatId, limit };
+  const keyword = normalizeKeyword(source.keyword);
+
+  return { productCatId, limit, keyword: keyword === "" ? null : keyword };
 }
 
 async function respondWithOffers(
@@ -105,6 +108,7 @@ export async function GET(
     readOfferParams({
       productCatId: search.get("productCatId"),
       limit: search.get("limit"),
+      keyword: search.get("keyword"),
     }),
   );
 }

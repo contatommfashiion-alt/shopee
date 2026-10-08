@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Eye, EyeOff, Loader2, LogIn, ServerCog, ShieldCheck, Coins } from "lucide-react";
+import { AlertTriangle, Eye, EyeOff, Loader2, LogIn, ServerCog, ShieldCheck, ShoppingCart } from "lucide-react";
 import { API_ERROR_MESSAGES } from "@/lib/api-errors";
 import type { ApiErrorCode, ShopeeCredentials } from "@/lib/types";
 
@@ -76,21 +76,14 @@ export default function LoginScreen({
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
           <div className="inline-flex items-center gap-2.5">
-            <span
-              aria-hidden="true"
-              className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-lg shadow-brand-600/25"
-            >
-              <Coins className="h-5 w-5" strokeWidth={2.5} />
-            </span>
-            <h1 className="text-3xl font-bold tracking-tight text-brand-600">
-              Laranjinha
-            </h1>
+            <ShoppingCart className="h-10 w-10 text-white" strokeWidth={2} aria-hidden="true" />
+            <h1 className="text-3xl font-medium tracking-tight text-white">Laranjinha</h1>
           </div>
-          <p className="mt-2 text-sm font-medium text-slate-600">Encontre. Compartilhe. Ganhe.</p>
+          <p className="mt-2 text-sm text-white/90">Encontre. Compartilhe. Ganhe.</p>
         </div>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <h2 className="text-base font-bold text-slate-900">Entrar</h2>
+        <section className="rounded-sm bg-white p-5 shadow-[0_3px_10px_rgba(0,0,0,0.14)] sm:p-7">
+          <h2 className="text-xl font-normal text-slate-900">Entrar</h2>
           <p className="mt-1 text-sm leading-relaxed text-slate-600">
             Conecte sua aplicação da Shopee Affiliate Open API. Não há cadastro: estes três dados
             são a sua identificação.
@@ -101,7 +94,7 @@ export default function LoginScreen({
               type="button"
               onClick={() => onUseServerCredentials(displayName.trim())}
               disabled={submitting}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-bold text-brand-800 transition hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-sm border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-bold text-brand-800 transition hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <ServerCog className="h-4 w-4" aria-hidden="true" />
               USAR AS CREDENCIAIS DO SERVIDOR
@@ -130,10 +123,10 @@ export default function LoginScreen({
                 value={displayName}
                 onChange={(event) => setDisplayName(event.target.value)}
                 placeholder="Seu nome ou o nome da sua loja"
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
+                className="w-full rounded-sm border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
               />
               <p className="text-xs text-slate-500">
-                Aparece no menu lateral no lugar do App ID. Fica só neste navegador e não é enviado
+                Aparece no topo da página no lugar do App ID. Fica só neste navegador e não é enviado
                 à Shopee.
               </p>
             </div>
@@ -152,7 +145,7 @@ export default function LoginScreen({
                 value={appId}
                 onChange={(event) => setAppId(event.target.value)}
                 placeholder="O Credential / App ID da sua aplicação"
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
+                className="w-full rounded-sm border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
               />
             </div>
 
@@ -171,7 +164,7 @@ export default function LoginScreen({
                   value={secret}
                   onChange={(event) => setSecret(event.target.value)}
                   placeholder="O Secret privado da aplicação"
-                  className="w-full rounded-xl border border-slate-200 py-2.5 pr-11 pl-3.5 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
+                  className="w-full rounded-sm border border-slate-200 py-2.5 pr-11 pl-3.5 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
                 />
 
                 <button
@@ -202,7 +195,7 @@ export default function LoginScreen({
                 value={apiUrl}
                 onChange={(event) => setApiUrl(event.target.value)}
                 placeholder="https://..."
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
+                className="w-full rounded-sm border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
               />
               <p className="text-xs text-slate-500">
                 A mesma URL do GraphiQL oficial onde você testou o{" "}
@@ -213,7 +206,7 @@ export default function LoginScreen({
               </p>
             </div>
 
-            <p className="rounded-xl bg-slate-50 p-3 text-xs leading-relaxed text-slate-600">
+            <p className="rounded-sm bg-slate-50 p-3 text-xs leading-relaxed text-slate-600">
               <span className="font-semibold text-slate-800">Você continua conectado</span> até
               clicar em <strong className="font-semibold">Sair</strong> ou{" "}
               <strong className="font-semibold">Trocar de conta</strong> — recarregar a página não
@@ -224,7 +217,7 @@ export default function LoginScreen({
             {message ? (
               <p
                 role="alert"
-                className="flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-xs leading-relaxed text-amber-900"
+                className="flex items-start gap-2 rounded-sm bg-amber-50 p-3 text-xs leading-relaxed text-amber-900"
               >
                 <AlertTriangle
                   className="mt-0.5 h-4 w-4 shrink-0 text-amber-600"
@@ -237,7 +230,7 @@ export default function LoginScreen({
             <button
               type="submit"
               disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-brand-700 active:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-sm bg-brand-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-brand-700 active:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting ? (
                 <>

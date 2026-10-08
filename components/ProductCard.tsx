@@ -1,6 +1,6 @@
 "use client";
 
-import { Flame, ShoppingCart, Star, Wallet } from "lucide-react";
+import { Star, Wallet } from "lucide-react";
 import ProductImage from "./ProductImage";
 import { formatBRL, formatDiscount, formatPercentage, formatRating, formatSales } from "@/lib/format";
 import type { Product } from "@/lib/types";
@@ -11,85 +11,89 @@ interface ProductCardProps {
   onCreateOffer: (product: Product) => void;
 }
 
-const IMAGE_SIZES = "(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw";
+const IMAGE_SIZES =
+  "(min-width: 1280px) 190px, (min-width: 1024px) 22vw, (min-width: 640px) 33vw, 50vw";
 
+/** "R$ 12,90" → "12,90", so the currency sign can be drawn smaller, as Shopee does. */
+function priceDigits(value: number): string {
+  return formatBRL(value).replace(/^R\$\s?/, "");
+}
+
+/**
+ * Product tile in Shopee's grid style: square image, two-line title, orange
+ * price, sales on the right, orange outline on hover.
+ */
 export default function ProductCard({ product, priority = false, onCreateOffer }: ProductCardProps) {
   const hasDiscount = product.discountRate !== null && product.discountRate > 0;
   const hasCommissionRate = product.commissionRate !== null && product.commissionRate > 0;
   const hasEstimate = product.commission !== null && product.commission > 0;
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
+    <article className="group flex flex-col overflow-hidden rounded-sm border border-transparent bg-white shadow-[0_1px_2px_rgba(0,0,0,0.1)] transition hover:z-10 hover:-translate-y-px hover:border-brand-500 hover:shadow-[0_1px_20px_rgba(0,0,0,0.05)]">
       <div className="relative aspect-square w-full overflow-hidden bg-slate-100">
         <ProductImage src={product.image} alt={product.name} sizes={IMAGE_SIZES} priority={priority} />
 
-        {hasDiscount ? (
-          <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-rose-500 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
-            <Flame className="h-3.5 w-3.5" aria-hidden="true" />
-            {formatDiscount(product.discountRate)} OFF
+        {hasCommissionRate ? (
+          <span className="absolute bottom-0 left-0 inline-flex items-center gap-1 bg-brand-600 px-1.5 py-0.5 text-[11px] font-medium text-white">
+            <Wallet className="h-3 w-3" aria-hidden="true" />
+            Comissão {formatPercentage(product.commissionRate)}
           </span>
         ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-3.5">
-        <h3 className="line-clamp-2 text-sm leading-snug font-semibold text-slate-900" title={product.name}>
+      <div className="flex flex-1 flex-col p-2">
+        <h3 className="line-clamp-2 min-h-[2.5rem] text-xs leading-5 text-slate-800" title={product.name}>
           {product.name}
         </h3>
 
-        <p className="truncate text-xs text-slate-500" title={product.shopName}>
-          {product.shopName}
-        </p>
+        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+          <p className="text-brand-500" aria-label={formatBRL(product.price)}>
+            <span className="text-xs">R$</span>
+            <span className="text-base font-medium">{priceDigits(product.price)}</span>
+          </p>
 
-        <p className="text-xl font-bold tracking-tight text-slate-900">{formatBRL(product.price)}</p>
-
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
-          {product.rating !== null ? (
-            <span className="inline-flex items-center gap-1">
-              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />
-              <span aria-label={`Avaliação ${formatRating(product.rating)} de 5`}>
-                {formatRating(product.rating)}
-              </span>
-            </span>
-          ) : null}
-
-          {product.sales > 0 ? (
-            <span className="inline-flex items-center gap-1">
-              <ShoppingCart className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-              {formatSales(product.sales)} vendidos
+          {hasDiscount ? (
+            <span className="rounded-[2px] bg-brand-50 px-1 py-px text-[10px] font-medium text-brand-600">
+              -{formatDiscount(product.discountRate)}
             </span>
           ) : null}
         </div>
 
-        {hasCommissionRate || hasEstimate ? (
-          <div className="mt-auto rounded-xl bg-brand-50 px-3 py-2.5">
-            {hasCommissionRate ? (
-              <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-800">
-                <Wallet className="h-3.5 w-3.5" aria-hidden="true" />
-                Comissão: {formatPercentage(product.commissionRate)}
-              </p>
-            ) : null}
+        <div className="mt-1 flex items-center justify-between gap-2 text-[11px] text-slate-500">
+          {product.rating !== null ? (
+            <span className="inline-flex items-center gap-0.5">
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" aria-hidden="true" />
+              <span aria-label={`Avaliação ${formatRating(product.rating)} de 5`}>
+                {formatRating(product.rating)}
+              </span>
+            </span>
+          ) : (
+            <span />
+          )}
 
-            {hasEstimate ? (
-              <>
-                <p className="mt-1 text-[11px] leading-tight text-brand-700">
-                  Você pode receber aproximadamente:
-                </p>
-                <p className="text-sm font-bold text-brand-900">{formatBRL(product.commission)}</p>
-              </>
-            ) : null}
-          </div>
-        ) : (
-          <div className="mt-auto" />
-        )}
+          {product.sales > 0 ? <span>{formatSales(product.sales)} vendidos</span> : null}
+        </div>
 
-        <button
-          type="button"
-          onClick={() => onCreateOffer(product)}
-          aria-label={`Criar oferta para ${product.name}`}
-          className="mt-1 w-full rounded-xl bg-brand-600 px-3 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700 active:bg-brand-800"
-        >
-          CRIAR OFERTA
-        </button>
+        <p className="mt-0.5 truncate text-[11px] text-slate-400" title={product.shopName}>
+          {product.shopName}
+        </p>
+
+        {hasEstimate ? (
+          <p className="mt-1.5 rounded-[2px] border border-dashed border-brand-300 bg-brand-50 px-1.5 py-1 text-[11px] leading-tight text-brand-700">
+            Você ganha ~<strong className="font-bold">{formatBRL(product.commission)}</strong>
+          </p>
+        ) : null}
+
+        <div className="mt-auto pt-2">
+          <button
+            type="button"
+            onClick={() => onCreateOffer(product)}
+            aria-label={`Criar oferta para ${product.name}`}
+            className="w-full rounded-sm bg-brand-600 px-2 py-2 text-xs font-medium text-white transition hover:bg-brand-700 active:bg-brand-800"
+          >
+            CRIAR OFERTA
+          </button>
+        </div>
       </div>
     </article>
   );

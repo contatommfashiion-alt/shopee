@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { BarChart3, KeyRound, LogOut, Menu, ServerCog, Tags, X, Coins } from "lucide-react";
+import { BarChart3, KeyRound, LogOut, ServerCog, Tags, ShoppingCart } from "lucide-react";
+import SearchBar from "./SearchBar";
 import { accountInitial, accountLabel } from "@/lib/session";
 
 export type Section = "ofertas" | "relatorios" | "conta";
@@ -25,17 +25,20 @@ interface AppShellProps {
   appId: string | null;
   /** Name typed at login. Empty falls back to the App ID. */
   displayName: string;
-  /** Offers currently loaded, shown as a pill. `null` while loading. */
+  /** Offers currently loaded, shown next to the tabs. `null` while loading. */
   offerCount: number | null;
+  /** Header search: typing filters what is loaded, submitting asks Shopee. */
+  search: string;
+  onSearchChange: (value: string) => void;
+  onSearchSubmit: (value: string) => void;
   onLogout: () => void;
   children: React.ReactNode;
 }
 
 /**
- * Dashboard layout: fixed sidebar from `lg` up, slide-in drawer below that.
- *
- * The navigation only lists what the app actually does — offers and the
- * connected account.
+ * Dashboard layout in Shopee's style: orange gradient header with the logo and
+ * the search box, a white tab bar below it, and content centered at 1200px on
+ * a light gray page.
  */
 export default function AppShell({
   section,
@@ -43,208 +46,119 @@ export default function AppShell({
   appId,
   displayName,
   offerCount,
+  search,
+  onSearchChange,
+  onSearchSubmit,
   onLogout,
   children,
 }: AppShellProps) {
   const label = accountLabel(displayName, appId);
   const hasName = displayName.trim() !== "";
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
-
-  // Esc closes the drawer, and the page behind it does not scroll.
-  useEffect(() => {
-    if (!drawerOpen) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeButtonRef.current?.focus();
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setDrawerOpen(false);
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [drawerOpen]);
-
-  function handleSelect(next: Section) {
-    onSelectSection(next);
-    setDrawerOpen(false);
-  }
-
-  const navigation = (
-    <nav aria-label="Seções" className="space-y-1">
-      {NAV.map((item) => {
-        const Icon = item.icon;
-        const isActive = section === item.id;
-
-        return (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => handleSelect(item.id)}
-            aria-current={isActive ? "page" : undefined}
-            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
-              isActive
-                ? "bg-brand-50 text-brand-800"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            <Icon
-              className={`h-4.5 w-4.5 ${isActive ? "text-brand-600" : "text-slate-400"}`}
-              aria-hidden="true"
-            />
-            {item.label}
-          </button>
-        );
-      })}
-    </nav>
-  );
-
-  const sidebarBody = (
-    <div className="flex h-full flex-col gap-5 p-4">
-      <div className="flex items-center gap-2.5 px-1">
-        <span
-          aria-hidden="true"
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white shadow-md shadow-brand-600/25"
-        >
-          <Coins className="h-4.5 w-4.5" strokeWidth={2.5} />
-        </span>
-        <div className="leading-tight">
-          <p className="text-base font-bold tracking-tight text-brand-600">
-            Laranjinha
-          </p>
-          <p className="text-[11px] text-slate-500">Encontre. Compartilhe. Ganhe.</p>
-        </div>
-      </div>
-
-      <div className="rounded-2xl bg-slate-50 p-3">
-        <div className="flex items-center gap-2.5">
-          <span
-            aria-hidden="true"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white"
-          >
-            {appId === null && !hasName ? <ServerCog className="h-4 w-4" /> : accountInitial(label)}
-          </span>
-
-          {/* The endpoint is deliberately not shown here — it lives in "Conta". */}
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900" title={label}>
-              {label}
-            </p>
-            <p className="flex items-center gap-1.5 text-[11px] text-slate-500">
-              <span
-                aria-hidden="true"
-                className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500"
-              />
-              {appId === null ? "Conectado pelo servidor" : "Conectado"}
-            </p>
-          </div>
-        </div>
-
-        {offerCount !== null ? (
-          <p className="mt-2.5 rounded-full bg-white px-3 py-1.5 text-center text-xs font-semibold text-brand-800">
-            {offerCount} {offerCount === 1 ? "oferta carregada" : "ofertas carregadas"}
-          </p>
-        ) : null}
-      </div>
-
-      {navigation}
-
-      <div className="mt-auto space-y-2 border-t border-slate-100 pt-3">
-        <button
-          type="button"
-          onClick={onLogout}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-rose-50 hover:text-rose-700"
-        >
-          <LogOut className="h-4.5 w-4.5 text-slate-400" aria-hidden="true" />
-          Sair
-        </button>
-
-        <p className="px-3 text-[11px] leading-snug text-slate-400">
-          Nada é armazenado. O app só prepara a mensagem — você escolhe a conversa e aperta enviar.
-        </p>
-      </div>
-    </div>
-  );
 
   return (
-    <div className="min-h-dvh lg:flex">
-      {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white lg:sticky lg:top-0 lg:block lg:h-dvh">
-        {sidebarBody}
-      </aside>
+    <div className="flex min-h-dvh flex-col">
+      <header className="shopee-header sticky top-0 z-30 text-white shadow-sm">
+        <div className="mx-auto max-w-[1200px] px-4">
+          {/* Top strip: tagline on the left, account on the right. */}
+          <div className="flex items-center justify-between gap-3 py-1.5 text-[13px]">
+            <p className="hidden text-white/90 sm:block">Encontre. Compartilhe. Ganhe.</p>
 
-      {/* Mobile top bar */}
-      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur lg:hidden">
-        <button
-          type="button"
-          onClick={() => setDrawerOpen(true)}
-          aria-label="Abrir menu"
-          aria-expanded={drawerOpen}
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-50"
-        >
-          <Menu className="h-5 w-5" aria-hidden="true" />
-        </button>
+            <div className="ml-auto flex items-center gap-3">
+              {/* The endpoint is deliberately not shown here — it lives in "Conta". */}
+              <span className="flex min-w-0 items-center gap-1.5" title={label}>
+                <span
+                  aria-hidden="true"
+                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-bold text-brand-600"
+                >
+                  {appId === null && !hasName ? <ServerCog className="h-3 w-3" /> : accountInitial(label)}
+                </span>
+                <span className="max-w-40 truncate font-medium">{label}</span>
+                <span className="hidden text-white/75 sm:inline">
+                  · {appId === null ? "conectado pelo servidor" : "conectado"}
+                </span>
+              </span>
 
-        <span
-          aria-hidden="true"
-          className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-600 text-white"
-        >
-          <Coins className="h-4 w-4" strokeWidth={2.5} />
-        </span>
+              <span aria-hidden="true" className="h-3 w-px bg-white/40" />
 
-        <p className="text-base font-bold tracking-tight text-brand-600">
-          Laranjinha
-        </p>
-
-        <span className="ml-auto text-xs font-semibold text-slate-500">
-          {SECTION_TITLES[section]}
-        </span>
-      </header>
-
-      {/* Mobile drawer */}
-      {drawerOpen ? (
-        <div
-          className="oz-fade-in fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm lg:hidden"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) setDrawerOpen(false);
-          }}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Menu"
-            className="oz-drawer-in flex h-full w-72 max-w-[85vw] flex-col bg-white shadow-2xl"
-          >
-            <div className="flex justify-end p-2">
               <button
-                ref={closeButtonRef}
                 type="button"
-                onClick={() => setDrawerOpen(false)}
-                aria-label="Fechar menu"
-                className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                onClick={onLogout}
+                className="inline-flex items-center gap-1 font-medium text-white transition hover:text-white/75"
               >
-                <X className="h-5 w-5" aria-hidden="true" />
+                <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+                Sair
               </button>
             </div>
+          </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto">{sidebarBody}</div>
+          {/* Logo + search. */}
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-2 pb-4">
+            <button
+              type="button"
+              onClick={() => onSelectSection("ofertas")}
+              className="flex shrink-0 items-center gap-2 rounded-sm"
+              aria-label="Laranjinha — ir para as ofertas"
+            >
+              <ShoppingCart className="h-8 w-8 sm:h-10 sm:w-10" strokeWidth={2} aria-hidden="true" />
+              <span className="text-2xl font-medium tracking-tight sm:text-3xl">Laranjinha</span>
+            </button>
+
+            <div className="w-full sm:w-auto sm:min-w-0 sm:flex-1">
+              <SearchBar
+                value={search}
+                onChange={(value) => {
+                  onSearchChange(value);
+                  if (section !== "ofertas") onSelectSection("ofertas");
+                }}
+                onSubmit={onSearchSubmit}
+              />
+            </div>
           </div>
         </div>
-      ) : null}
+      </header>
 
-      <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+      <nav aria-label="Seções" className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-[1200px] items-center px-4">
+          {NAV.map((item) => {
+            const Icon = item.icon;
+            const isActive = section === item.id;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelectSection(item.id)}
+                aria-current={isActive ? "page" : undefined}
+                className={`-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition ${
+                  isActive
+                    ? "border-brand-500 text-brand-600"
+                    : "border-transparent text-slate-600 hover:text-brand-600"
+                }`}
+              >
+                <Icon className="h-4 w-4" aria-hidden="true" />
+                {item.label}
+              </button>
+            );
+          })}
+
+          {offerCount !== null ? (
+            <p className="ml-auto hidden text-xs text-slate-500 sm:block">
+              {offerCount} {offerCount === 1 ? "oferta carregada" : "ofertas carregadas"}
+            </p>
+          ) : null}
+        </div>
+      </nav>
+
+      <main className="mx-auto w-full max-w-[1200px] min-w-0 flex-1 px-4 py-5">
         <h1 className="sr-only">{SECTION_TITLES[section]}</h1>
         {children}
       </main>
+
+      <footer className="border-t-4 border-brand-500 bg-white">
+        <p className="mx-auto max-w-[1200px] px-4 py-4 text-center text-xs leading-snug text-slate-500">
+          Nada é armazenado. O app só prepara a mensagem — você escolhe a conversa e aperta enviar.
+        </p>
+      </footer>
     </div>
   );
 }

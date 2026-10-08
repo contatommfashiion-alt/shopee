@@ -27,7 +27,7 @@ export default function RecentOrders({ rows, limit = 20, onOpenDetails }: Recent
   const visible = rows.slice(0, limit);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <section className="overflow-hidden rounded-sm border border-slate-200 bg-white shadow-sm">
       <h3 className="flex items-center gap-2 border-b border-slate-100 px-5 py-4 text-sm font-bold text-slate-900">
         <Receipt className="h-4 w-4 text-brand-600" aria-hidden="true" />
         Pedidos recentes
@@ -134,7 +134,7 @@ export default function RecentOrders({ rows, limit = 20, onOpenDetails }: Recent
             <button
               type="button"
               onClick={() => onOpenDetails(row)}
-              className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-50"
+              className="mt-2 w-full rounded-sm border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-50"
             >
               VER DETALHES
             </button>

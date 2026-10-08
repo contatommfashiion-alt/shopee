@@ -10,10 +10,22 @@ export interface ProductOfferParams {
   productCatId?: number | null;
   /** A Shopee recusa acima de 50: `Exceeded the maximum number of page limit`. */
   limit?: number;
+  /** Busca por palavra-chave feita pela própria Shopee. Vazio = sem busca. */
+  keyword?: string | null;
 }
 
 /** Teto confirmado contra o endpoint. */
 export const PRODUCT_OFFER_MAX_LIMIT = 50;
+
+/** Buscas maiores que isso são cortadas; nenhum título útil precisa de mais. */
+export const KEYWORD_MAX_LENGTH = 100;
+
+/** Espaços colapsados, aparado e cortado no tamanho máximo. `""` = sem busca. */
+export function normalizeKeyword(keyword: unknown): string {
+  if (typeof keyword !== "string") return "";
+
+  return keyword.replace(/\s+/g, " ").trim().slice(0, KEYWORD_MAX_LENGTH).trim();
+}
 
 /** O conjunto de campos confirmado, usado em toda consulta de ofertas. */
 const SELECTION = `
@@ -53,12 +65,14 @@ const SELECTION = `
  *
  * A introspecção do schema confirmou os argumentos aceitos: `listType`,
  * `matchId`, `keyword`, `sortType`, `page`, `limit`, `itemId`, `shopId`,
- * `productCatId`, `isAMSOffer` e `isKeySeller`. Só `productCatId` e `limit`
- * são usados por enquanto.
+ * `productCatId`, `isAMSOffer` e `isKeySeller`. São usados `limit`,
+ * `productCatId` e `keyword`.
  *
  * Os valores vão como literais inline, pelo mesmo motivo da `conversionReport`:
- * por variável GraphQL o endpoint responde `wrong type`. Só entram inteiros
- * truncados, então não há como injetar sintaxe na query.
+ * por variável GraphQL o endpoint responde `wrong type`. Números entram
+ * truncados; a `keyword` entra por `JSON.stringify`, que produz uma string
+ * GraphQL válida com aspas, barras e caracteres de controle escapados — o
+ * texto digitado nunca vira sintaxe da query.
  */
 export function buildProductOfferQuery(params: ProductOfferParams = {}): string {
   const limit = Math.min(
@@ -71,6 +85,9 @@ export function buildProductOfferQuery(params: ProductOfferParams = {}): string 
   if (typeof params.productCatId === "number" && Number.isFinite(params.productCatId)) {
     args.push(`productCatId: ${Math.trunc(params.productCatId)}`);
   }
+
+  const keyword = normalizeKeyword(params.keyword);
+  if (keyword !== "") args.push(`keyword: ${JSON.stringify(keyword)}`);
 
   return `{
   productOfferV2(${args.join(", ")}) {${SELECTION}}

@@ -78,7 +78,7 @@ export default function OrderDetails({ row, onClose }: OrderDetailsProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="order-details-title"
-        className="oz-panel-in flex max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-h-[90dvh] sm:rounded-3xl"
+        className="oz-panel-in flex max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-lg bg-white shadow-2xl sm:max-h-[90dvh] sm:rounded-sm"
       >
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
           <div className="min-w-0">
@@ -103,7 +103,7 @@ export default function OrderDetails({ row, onClose }: OrderDetailsProps) {
         </div>
 
         <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
-          <dl className="grid grid-cols-2 gap-3 rounded-2xl bg-slate-50 p-3.5 text-sm sm:grid-cols-4">
+          <dl className="grid grid-cols-2 gap-3 rounded-sm bg-slate-50 p-3.5 text-sm sm:grid-cols-4">
             <div>
               <dt className="text-xs text-slate-500">Itens</dt>
               <dd className="font-semibold text-slate-900">{row.qty}</dd>
@@ -131,7 +131,7 @@ export default function OrderDetails({ row, onClose }: OrderDetailsProps) {
           <ul className="mt-2 divide-y divide-slate-100">
             {order.items.map((item, index) => (
               <li key={`${item.itemId}-${index}`} className="flex items-start gap-3 py-3.5">
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-sm bg-slate-100">
                   <ProductImage src={item.imageUrl} alt={item.itemName} sizes="64px" />
                 </div>
 

@@ -68,7 +68,7 @@ export default function ReportSummaryCards({ summary }: ReportSummaryCardsProps)
         return (
           <div
             key={card.key}
-            className={`rounded-2xl border p-4 ${
+            className={`rounded-sm border p-4 ${
               highlight ? "border-brand-200 bg-brand-50" : "border-slate-200 bg-white"
             }`}
           >

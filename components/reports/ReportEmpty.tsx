@@ -25,10 +25,10 @@ export default function ReportEmpty({
 }: ReportEmptyProps) {
   if (outsideApiWindow) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50 px-6 py-12 text-center">
+      <div className="flex flex-col items-center gap-4 rounded-sm border border-amber-200 bg-amber-50 px-6 py-12 text-center">
         <span
           aria-hidden="true"
-          className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-700"
+          className="flex h-14 w-14 items-center justify-center rounded-sm bg-amber-100 text-amber-700"
         >
           <CalendarX2 className="h-7 w-7" />
         </span>
@@ -51,7 +51,7 @@ export default function ReportEmpty({
         <button
           type="button"
           onClick={onUseMaxPeriod}
-          className="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-amber-700 active:bg-amber-800"
+          className="rounded-sm bg-amber-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-amber-700 active:bg-amber-800"
         >
           VER OS ÚLTIMOS 3 MESES
         </button>
@@ -60,10 +60,10 @@ export default function ReportEmpty({
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+    <div className="flex flex-col items-center gap-4 rounded-sm border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
       <span
         aria-hidden="true"
-        className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400"
+        className="flex h-14 w-14 items-center justify-center rounded-sm bg-slate-100 text-slate-400"
       >
         <Inbox className="h-7 w-7" />
       </span>
@@ -80,7 +80,7 @@ export default function ReportEmpty({
       <button
         type="button"
         onClick={onUseMaxPeriod}
-        className="rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700 active:bg-brand-800"
+        className="rounded-sm bg-brand-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-brand-700 active:bg-brand-800"
       >
         VER OS ÚLTIMOS 3 MESES
       </button>

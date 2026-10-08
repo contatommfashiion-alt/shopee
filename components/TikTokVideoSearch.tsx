@@ -42,7 +42,7 @@ export default function TikTokVideoSearch({ productName }: TikTokVideoSearchProp
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                  className="inline-flex items-center gap-1.5 rounded-sm border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 transition hover:border-brand-500 hover:text-brand-600"
                 >
                   {suggestion}
                   <ExternalLink className="h-3 w-3 text-slate-400" aria-hidden="true" />
@@ -69,12 +69,12 @@ export default function TikTokVideoSearch({ productName }: TikTokVideoSearchProp
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Digite palavras-chave"
-          className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
+          className="min-w-0 flex-1 rounded-sm border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
         />
         <button
           type="submit"
           disabled={!queryUrl}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-sm bg-slate-900 px-3.5 py-2 text-xs font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Search className="h-3.5 w-3.5" aria-hidden="true" />
           BUSCAR

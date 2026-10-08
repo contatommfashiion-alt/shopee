@@ -79,9 +79,18 @@ export default function AdvancedFilters({ value, onApply, onClear }: AdvancedFil
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    // Min above max is a typo: swap them here too, so the fields show what applies.
+    let minPrice = parseField(draft.minPrice);
+    let maxPrice = parseField(draft.maxPrice);
+    if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
+      [minPrice, maxPrice] = [maxPrice, minPrice];
+      setDraft((previous) => ({ ...previous, minPrice: previous.maxPrice, maxPrice: previous.minPrice }));
+    }
+
     onApply({
-      minPrice: parseField(draft.minPrice),
-      maxPrice: parseField(draft.maxPrice),
+      minPrice,
+      maxPrice,
       minDiscount: parseField(draft.minDiscount),
       minRating: parseField(draft.minRating),
       minSales: parseField(draft.minSales),
@@ -95,19 +104,19 @@ export default function AdvancedFilters({ value, onApply, onClear }: AdvancedFil
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className="rounded-sm bg-white shadow-[0_1px_1px_rgba(0,0,0,0.05)]">
       <button
         type="button"
         onClick={() => setOpen((previous) => !previous)}
         aria-expanded={open}
         aria-controls="advanced-filters-panel"
-        className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left"
+        className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left"
       >
-        <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-800">
-          <SlidersHorizontal className="h-4 w-4 text-slate-500" aria-hidden="true" />
+        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-800">
+          <SlidersHorizontal className="h-4 w-4 text-brand-500" aria-hidden="true" />
           Filtros avançados
           {activeCount > 0 ? (
-            <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-bold text-brand-800">
+            <span className="rounded-sm bg-brand-600 px-1.5 py-px text-[11px] font-medium text-white">
               {activeCount}
             </span>
           ) : null}
@@ -120,8 +129,9 @@ export default function AdvancedFilters({ value, onApply, onClear }: AdvancedFil
       </button>
 
       <div id="advanced-filters-panel" hidden={!open}>
-        <form onSubmit={handleSubmit} className="border-t border-slate-100 p-4">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <form onSubmit={handleSubmit} className="border-t border-slate-100 p-3">
+          {/* One column in the narrow left sidebar from `lg` up. */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-1">
             {FIELDS.map((field) => (
               <div key={field.key} className="flex flex-col gap-1.5">
                 <label htmlFor={`filter-${field.key}`} className="text-xs font-medium text-slate-600">
@@ -140,24 +150,24 @@ export default function AdvancedFilters({ value, onApply, onClear }: AdvancedFil
                   onChange={(event) =>
                     setDraft((previous) => ({ ...previous, [field.key]: event.target.value }))
                   }
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
+                  className="w-full rounded-sm border border-slate-300 px-2.5 py-1.5 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none"
                 />
               </div>
             ))}
           </div>
 
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex gap-2 lg:flex-col">
             <button
               type="submit"
-              className="flex-1 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700 active:bg-brand-800"
+              className="flex-1 rounded-sm bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-700 active:bg-brand-800"
             >
-              APLICAR FILTROS
+              APLICAR
             </button>
 
             <button
               type="button"
               onClick={handleClear}
-              className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              className="rounded-sm border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
               LIMPAR
             </button>

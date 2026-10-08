@@ -38,11 +38,11 @@ export default function AccountSection({
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-4">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-sm border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-start gap-3">
           <span
             aria-hidden="true"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-brand-50 text-brand-700"
           >
             {fromServer ? <ServerCog className="h-5 w-5" /> : <KeyRound className="h-5 w-5" />}
           </span>
@@ -106,7 +106,7 @@ export default function AccountSection({
             type="button"
             onClick={onReload}
             disabled={reloading}
-            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700 active:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-sm bg-brand-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-700 active:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <RefreshCw className={`h-4 w-4 ${reloading ? "animate-spin" : ""}`} aria-hidden="true" />
             {reloading ? "ATUALIZANDO..." : "ATUALIZAR OFERTAS"}
@@ -115,7 +115,7 @@ export default function AccountSection({
           <button
             type="button"
             onClick={onSwitchAccount}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+            className="inline-flex items-center gap-2 rounded-sm border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
           >
             <KeyRound className="h-4 w-4" aria-hidden="true" />
             TROCAR DE CONTA
@@ -124,7 +124,7 @@ export default function AccountSection({
           <button
             type="button"
             onClick={onLogout}
-            className="inline-flex items-center gap-2 rounded-xl border border-rose-200 px-4 py-2.5 text-sm font-bold text-rose-700 transition hover:bg-rose-50"
+            className="inline-flex items-center gap-2 rounded-sm border border-rose-200 px-4 py-2.5 text-sm font-bold text-rose-700 transition hover:bg-rose-50"
           >
             <LogOut className="h-4 w-4" aria-hidden="true" />
             SAIR

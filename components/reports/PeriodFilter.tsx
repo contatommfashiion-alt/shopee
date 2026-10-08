@@ -45,7 +45,7 @@ export default function PeriodFilter({
   const maxDate = todayDateInputValue(today);
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <section className="rounded-sm border border-slate-200 bg-white p-4 shadow-sm">
       <div role="group" aria-label="Período" className="flex flex-wrap gap-2">
         {PERIOD_OPTIONS.map((option) => {
           const isActive = period === option.id;
@@ -82,7 +82,7 @@ export default function PeriodFilter({
               max={maxDate}
               value={custom.from}
               onChange={(event) => onCustomChange({ ...custom, from: event.target.value })}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
+              className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
             />
           </div>
 
@@ -97,7 +97,7 @@ export default function PeriodFilter({
               max={maxDate}
               value={custom.to}
               onChange={(event) => onCustomChange({ ...custom, to: event.target.value })}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
+              className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
             />
           </div>
         </div>

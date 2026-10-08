@@ -1,6 +1,38 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PRODUCT_OFFER_MAX_LIMIT, buildProductOfferQuery } from "../lib/shopee-query.ts";
+import {
+  KEYWORD_MAX_LENGTH,
+  PRODUCT_OFFER_MAX_LIMIT,
+  buildProductOfferQuery,
+  normalizeKeyword,
+} from "../lib/shopee-query.ts";
+
+test("com busca, manda keyword como string GraphQL", () => {
+  const query = buildProductOfferQuery({ keyword: "  tênis   masculino ", productCatId: 100630 });
+
+  assert.ok(query.includes('keyword: "tênis masculino"'));
+  assert.ok(query.includes("productCatId: 100630"), "a busca convive com o nicho");
+});
+
+test("sem busca, ou busca em branco, não manda keyword", () => {
+  for (const keyword of [undefined, null, "", "   "]) {
+    assert.ok(!buildProductOfferQuery({ keyword }).includes("keyword:"), `deveria ignorar: ${String(keyword)}`);
+  }
+});
+
+test("aspas e barras da busca são escapadas, sem quebrar a query", () => {
+  const query = buildProductOfferQuery({ keyword: 'x") { __schema { types { name } } } #\\' });
+
+  assert.ok(query.includes('keyword: "x\\") { __schema { types { name } } } #\\\\"'));
+  // A string termina onde deveria: logo depois vem o fechamento dos argumentos.
+  assert.ok(query.includes('#\\\\") {'));
+});
+
+test("normalizeKeyword colapsa espaços e corta no tamanho máximo", () => {
+  assert.equal(normalizeKeyword("  a \n b  "), "a b");
+  assert.equal(normalizeKeyword(42), "");
+  assert.equal(normalizeKeyword("x".repeat(500)).length, KEYWORD_MAX_LENGTH);
+});
 
 test("o limite máximo é o confirmado contra o endpoint", () => {
   // Pedir acima disso devolve:

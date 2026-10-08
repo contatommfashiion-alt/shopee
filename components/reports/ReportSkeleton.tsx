@@ -7,13 +7,13 @@ export default function ReportSkeleton() {
       aria-busy="true"
       aria-label="Carregando relatórios"
     >
-      <div className="h-16 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+      <div className="h-16 animate-pulse rounded-sm border border-slate-200 bg-white" />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, index) => (
           <div
             key={index}
-            className="animate-pulse rounded-2xl border border-slate-200 bg-white p-4"
+            className="animate-pulse rounded-sm border border-slate-200 bg-white p-4"
           >
             <div className="h-3 w-24 rounded bg-slate-200" />
             <div className="mt-2 h-7 w-28 rounded bg-slate-200" />
@@ -23,11 +23,11 @@ export default function ReportSkeleton() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="h-56 animate-pulse rounded-2xl border border-slate-200 bg-white" />
-        <div className="h-56 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+        <div className="h-56 animate-pulse rounded-sm border border-slate-200 bg-white" />
+        <div className="h-56 animate-pulse rounded-sm border border-slate-200 bg-white" />
       </div>
 
-      <div className="h-72 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+      <div className="h-72 animate-pulse rounded-sm border border-slate-200 bg-white" />
 
       <span className="sr-only">Carregando relatórios da Shopee...</span>
     </div>
