@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, Clipboard, ExternalLink, Share2, ShoppingCart, Star, X } from "lucide-react";
+import { Check, Clipboard, Download, ExternalLink, MessageSquareText, Share2, ShoppingCart, Star, X } from "lucide-react";
 import ProductImage from "./ProductImage";
 import TikTokVideoSearch from "./TikTokVideoSearch";
 import { formatBRL, formatDiscount, formatPercentage, formatRating, formatSales } from "@/lib/format";
 import { DEFAULT_TEMPLATE_ID, MESSAGE_TEMPLATES, buildMessage, buildWhatsAppShareUrl } from "@/lib/message";
 import { getPreferredOfferLink } from "@/lib/offer-link";
+import { canShareImage, fetchImageFile } from "@/lib/share-image";
 import type { MessageTemplateId, Product } from "@/lib/types";
 
 interface OfferModalProps {
@@ -38,9 +39,13 @@ function legacyCopy(text: string): boolean {
 /**
  * Bottom sheet on phones, centered modal on larger screens.
  *
- * The WhatsApp button only OPENS WhatsApp's share flow with the message
- * pre-filled. The user picks the conversation or group and presses send —
- * nothing is sent automatically and no WhatsApp API is used.
+ * The WhatsApp button only OPENS a share flow with the message pre-filled. The
+ * user picks the conversation or group and presses send — nothing is sent
+ * automatically and no WhatsApp API is used.
+ *
+ * When the browser can share files (phones, and Windows/macOS with the
+ * WhatsApp app installed), the photo goes too, through the system share
+ * sheet. Otherwise it falls back to WhatsApp's text-only share link.
  */
 /** Feedback is tied to the template it was produced for. */
 interface Feedback {
@@ -58,6 +63,25 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
 
   const message = useMemo(() => buildMessage(product, templateId), [product, templateId]);
   const preferredLink = useMemo(() => getPreferredOfferLink(product), [product]);
+
+  /**
+   * The photo is downloaded as soon as the modal opens. `navigator.share` has
+   * to run straight from the click — iOS refuses it after an `await` — so the
+   * file must already be in hand when the button is pressed.
+   */
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const withPhoto = canShareImage(imageFile, message);
+
+  useEffect(() => {
+    if (!product.image) return;
+
+    const controller = new AbortController();
+    void fetchImageFile(product.image, product.itemId, controller.signal).then((file) => {
+      if (!controller.signal.aborted) setImageFile(file);
+    });
+
+    return () => controller.abort();
+  }, [product.image, product.itemId]);
 
   // Switching template invalidates the previous feedback. Deriving it from the
   // selected template avoids an effect that would only reset state.
@@ -133,7 +157,8 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
     });
   }, [message, templateId]);
 
-  const handleWhatsApp = useCallback(() => {
+  /** Text only, through WhatsApp's share link. */
+  const handleWhatsAppText = useCallback(() => {
     const shareWindow = window.open(buildWhatsAppShareUrl(message), "_blank", "noopener,noreferrer");
 
     if (shareWindow) {
@@ -148,6 +173,56 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
     // Pop-up blocked: fall back to copying so the message is not lost.
     void handleCopy();
   }, [message, templateId, handleCopy]);
+
+  /** Photo + text through the system share sheet, when possible. */
+  const handleWhatsApp = useCallback(() => {
+    if (!canShareImage(imageFile, message)) {
+      handleWhatsAppText();
+      return;
+    }
+
+    // Some apps (WhatsApp on iPhone, mainly) keep the photo and drop the text.
+    // Having it on the clipboard lets the user paste it as the caption.
+    void navigator.clipboard?.writeText(message).catch(() => undefined);
+
+    navigator
+      .share({ files: [imageFile], text: message })
+      .then(() => {
+        setFeedback({
+          templateId,
+          copied: true,
+          message:
+            "Foto e texto enviados para o WhatsApp. Se o texto não aparecer junto da foto, ele está copiado: cole como legenda.",
+        });
+      })
+      .catch((error: unknown) => {
+        // Closing the share sheet is a choice, not an error.
+        if (error instanceof DOMException && error.name === "AbortError") return;
+
+        setFeedback({
+          templateId,
+          copied: false,
+          message: "Não deu para enviar a foto por aqui. Use \"Enviar só o texto\" ou baixe a foto.",
+        });
+      });
+  }, [imageFile, message, templateId, handleWhatsAppText]);
+
+  /** Saves the photo, for attaching it by hand (WhatsApp Web on a computer). */
+  const handleDownloadPhoto = useCallback(() => {
+    if (!imageFile) {
+      if (product.image) window.open(product.image, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    const url = URL.createObjectURL(imageFile);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = imageFile.name;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, [imageFile, product.image]);
 
   return (
     <div
@@ -319,8 +394,29 @@ export default function OfferModal({ product, onClose }: OfferModalProps) {
             className="flex w-full items-center justify-center gap-2 rounded-sm bg-brand-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-brand-700 active:bg-brand-800"
           >
             <Share2 className="h-4 w-4" aria-hidden="true" />
-            COMPARTILHAR NO WHATSAPP
+            {withPhoto ? "COMPARTILHAR NO WHATSAPP COM FOTO" : "COMPARTILHAR NO WHATSAPP"}
           </button>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={handleWhatsAppText}
+              className="flex items-center justify-center gap-1.5 rounded-sm border border-slate-300 px-2 py-2 text-xs font-medium text-slate-700 transition hover:border-brand-500 hover:text-brand-600"
+            >
+              <MessageSquareText className="h-3.5 w-3.5" aria-hidden="true" />
+              ENVIAR SÓ O TEXTO
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDownloadPhoto}
+              disabled={!product.image}
+              className="flex items-center justify-center gap-1.5 rounded-sm border border-slate-300 px-2 py-2 text-xs font-medium text-slate-700 transition hover:border-brand-500 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Download className="h-3.5 w-3.5" aria-hidden="true" />
+              BAIXAR FOTO
+            </button>
+          </div>
 
           {preferredLink ? (
             <a

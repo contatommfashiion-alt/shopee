@@ -120,6 +120,13 @@ test("the message uses the preferred link (offerLink first)", () => {
 test("the WhatsApp URL only pre-fills the text, encoded", () => {
   const url = buildWhatsAppShareUrl("Oferta & cia\nR$ 10,00 #1");
 
-  assert.equal(url, "https://wa.me/?text=Oferta%20%26%20cia%0AR%24%2010%2C00%20%231");
-  assert.ok(url.startsWith("https://wa.me/?text="), "no phone number, no automatic send");
+  assert.equal(url, "https://api.whatsapp.com/send?text=Oferta%20%26%20cia%0AR%24%2010%2C00%20%231");
+  assert.ok(url.startsWith("https://api.whatsapp.com/send?text="), "no phone number, no automatic send");
+});
+
+test("emoji go out as their UTF-8 bytes, not through wa.me (which turns them into �)", () => {
+  const url = buildWhatsAppShareUrl("🔥 ⭐ ⚠️");
+
+  assert.ok(!url.includes("wa.me"));
+  assert.ok(url.endsWith("%F0%9F%94%A5%20%E2%AD%90%20%E2%9A%A0%EF%B8%8F"));
 });

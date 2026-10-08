@@ -102,10 +102,15 @@ export function buildMessage(product: Product, templateId: MessageTemplateId): s
 /**
  * WhatsApp share URL.
  *
- * `wa.me` with only a `text` parameter opens WhatsApp's own share flow: the
+ * A link with only a `text` parameter opens WhatsApp's own share flow: the
  * user picks the person or group and presses send. Nothing is sent
  * automatically, and no WhatsApp API is involved.
+ *
+ * It points at `api.whatsapp.com/send`, not `wa.me`: the `wa.me` redirect
+ * replaces every emoji with "�" (U+FFFD) before WhatsApp even sees the text.
+ * `api.whatsapp.com/send` passes the emoji bytes through to the app and to
+ * WhatsApp Web untouched.
  */
 export function buildWhatsAppShareUrl(message: string): string {
-  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+  return `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
 }
