@@ -37,7 +37,7 @@ export default function QuickFilters({ active, onChange }: QuickFiltersProps) {
       <div
         role="group"
         aria-label="Filtros rápidos"
-        className="-mx-4 flex min-w-0 gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+        className="flex min-w-0 flex-wrap gap-2"
       >
         {QUICK_FILTERS.map((filter) => {
           const isActive = active === filter.id;
@@ -49,7 +49,7 @@ export default function QuickFilters({ active, onChange }: QuickFiltersProps) {
               type="button"
               aria-pressed={isActive}
               onClick={() => onChange(isActive ? null : filter.id)}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-sm px-3 py-1.5 text-sm whitespace-nowrap shadow-[0_1px_1px_rgba(0,0,0,0.05)] transition ${
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-sm px-2.5 py-1.5 text-[13px] whitespace-nowrap sm:px-3 sm:text-sm shadow-[0_1px_1px_rgba(0,0,0,0.05)] transition ${
                 isActive
                   ? "bg-brand-600 text-white"
                   : "bg-white text-slate-800 hover:bg-slate-50"

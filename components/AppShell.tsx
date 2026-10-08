@@ -61,9 +61,11 @@ export default function AppShell({
         <div className="mx-auto max-w-[1200px] px-4">
           {/* Top strip: tagline on the left, account on the right. */}
           <div className="flex items-center justify-between gap-3 py-1.5 text-[13px]">
-            <p className="hidden text-white/90 sm:block">Encontre. Compartilhe. Ganhe.</p>
+            <p className="min-w-0 truncate text-xs text-white/90 sm:text-[13px]">
+              Encontre. Compartilhe. Ganhe.
+            </p>
 
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ml-auto flex shrink-0 items-center gap-3">
               {/* The endpoint is deliberately not shown here — it lives in "Conta". */}
               <span className="flex min-w-0 items-center gap-1.5" title={label}>
                 <span
@@ -72,7 +74,7 @@ export default function AppShell({
                 >
                   {appId === null && !hasName ? <ServerCog className="h-3 w-3" /> : accountInitial(label)}
                 </span>
-                <span className="max-w-40 truncate font-medium">{label}</span>
+                <span className="max-w-24 truncate font-medium sm:max-w-40">{label}</span>
                 <span className="hidden text-white/75 sm:inline">
                   · {appId === null ? "conectado pelo servidor" : "conectado"}
                 </span>
@@ -155,8 +157,9 @@ export default function AppShell({
       </main>
 
       <footer className="border-t-4 border-brand-500 bg-white">
-        <p className="mx-auto max-w-[1200px] px-4 py-4 text-center text-xs leading-snug text-slate-500">
-          Nada é armazenado. O app só prepara a mensagem — você escolhe a conversa e aperta enviar.
+        <p className="mx-auto flex max-w-[1200px] items-center justify-center gap-1.5 px-4 py-4 text-sm font-medium text-brand-600">
+          <ShoppingCart className="h-5 w-5" aria-hidden="true" />
+          Laranjinha
         </p>
       </footer>
     </div>
