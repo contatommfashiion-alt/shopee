@@ -101,3 +101,33 @@ export function buildTikTokSearchUrl(query: string): string | null {
 
   return `${TIKTOK_SEARCH_URL}?q=${encodeURIComponent(trimmed)}`;
 }
+
+/** Package name of the TikTok app on Android (outside Asia). */
+const TIKTOK_ANDROID_PACKAGE = "com.zhiliaoapp.musically";
+
+/**
+ * Same search, but asking Android to open it in the TikTok app.
+ *
+ * A plain https link opens in the browser unless the phone was set to open
+ * TikTok links in the app. An `intent://` link names the app explicitly; when
+ * it is not installed, Chrome follows `browser_fallback_url` to the web search.
+ *
+ * iOS has no equivalent: Safari only hands a link to an app through Universal
+ * Links, which the phone decides, so iOS keeps the https link.
+ */
+export function buildTikTokAndroidUrl(query: string): string | null {
+  const webUrl = buildTikTokSearchUrl(query);
+  if (webUrl === null) return null;
+
+  const pathAndQuery = webUrl.replace(/^https:\/\//, "");
+
+  return (
+    `intent://${pathAndQuery}#Intent;scheme=https;package=${TIKTOK_ANDROID_PACKAGE};` +
+    `S.browser_fallback_url=${encodeURIComponent(webUrl)};end`
+  );
+}
+
+/** True on Android phones and tablets, where `buildTikTokAndroidUrl` applies. */
+export function isAndroid(userAgent: string): boolean {
+  return /\bAndroid\b/i.test(userAgent);
+}

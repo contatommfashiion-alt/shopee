@@ -1,6 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildTikTokSearchUrl, buildTikTokSuggestions, extractKeywords } from "../lib/tiktok-search.ts";
+import {
+  buildTikTokAndroidUrl,
+  buildTikTokSearchUrl,
+  buildTikTokSuggestions,
+  extractKeywords,
+  isAndroid,
+} from "../lib/tiktok-search.ts";
 
 test("strips Shopee marketing noise and quantities", () => {
   assert.deepEqual(
@@ -49,4 +55,20 @@ test("builds an encoded TikTok search URL that also works on phones", () => {
     "https://www.tiktok.com/search?q=garrafa%20t%C3%A9rmica",
   );
   assert.equal(buildTikTokSearchUrl("   "), null);
+});
+
+test("on Android, the link names the TikTok app and falls back to the web search", () => {
+  assert.equal(
+    buildTikTokAndroidUrl("garrafa térmica"),
+    "intent://www.tiktok.com/search?q=garrafa%20t%C3%A9rmica#Intent;scheme=https;" +
+      "package=com.zhiliaoapp.musically;" +
+      "S.browser_fallback_url=https%3A%2F%2Fwww.tiktok.com%2Fsearch%3Fq%3Dgarrafa%2520t%25C3%25A9rmica;end",
+  );
+  assert.equal(buildTikTokAndroidUrl("  "), null);
+});
+
+test("detects Android from the user agent", () => {
+  assert.equal(isAndroid("Mozilla/5.0 (Linux; Android 14; Pixel 8) Chrome/130 Mobile"), true);
+  assert.equal(isAndroid("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Safari"), false);
+  assert.equal(isAndroid("Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130"), false);
 });

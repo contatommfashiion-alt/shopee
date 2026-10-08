@@ -2,7 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { ExternalLink, Search } from "lucide-react";
-import { buildTikTokSearchUrl, buildTikTokSuggestions } from "@/lib/tiktok-search";
+import {
+  buildTikTokAndroidUrl,
+  buildTikTokSearchUrl,
+  buildTikTokSuggestions,
+  isAndroid,
+} from "@/lib/tiktok-search";
 
 interface TikTokVideoSearchProps {
   productName: string;
@@ -10,7 +15,12 @@ interface TikTokVideoSearchProps {
 
 /**
  * Suggests TikTok searches built from the Shopee title. Each one only opens
- * TikTok's own search page in a new tab — no TikTok API is called.
+ * TikTok's own search — no TikTok API is called.
+ *
+ * On Android the search is handed to the TikTok app (web search as fallback).
+ * Elsewhere it is a normal link, which the phone may open in the app on its
+ * own. Either way the words are copied, so they can be pasted into TikTok's
+ * search if the app opens without them.
  *
  * Remount it (via `key`) when the product changes so the editable query
  * restarts from the new title.
@@ -18,8 +28,33 @@ interface TikTokVideoSearchProps {
 export default function TikTokVideoSearch({ productName }: TikTokVideoSearchProps) {
   const suggestions = useMemo(() => buildTikTokSuggestions(productName), [productName]);
   const [query, setQuery] = useState(() => suggestions[0] ?? "");
+  const [copiedQuery, setCopiedQuery] = useState<string | null>(null);
+  // The modal only ever renders in the browser, so `navigator` is there.
+  const [android] = useState(() => typeof navigator !== "undefined" && isAndroid(navigator.userAgent));
 
   const queryUrl = buildTikTokSearchUrl(query);
+
+  /** Opens the search, preferring the app. Returns false when it handled the navigation itself. */
+  function openSearch(term: string): boolean {
+    const trimmed = term.trim().replace(/\s+/g, " ");
+    if (trimmed === "") return true;
+
+    void navigator.clipboard
+      ?.writeText(trimmed)
+      .then(() => setCopiedQuery(trimmed))
+      .catch(() => undefined);
+
+    if (android) {
+      const appUrl = buildTikTokAndroidUrl(trimmed);
+      if (appUrl) {
+        // Same tab on purpose: Chrome hands `intent://` to the app and the page stays put.
+        window.location.assign(appUrl);
+        return false;
+      }
+    }
+
+    return true;
+  }
 
   return (
     <section className="mt-5" aria-labelledby="tiktok-search-title">
@@ -27,7 +62,7 @@ export default function TikTokVideoSearch({ productName }: TikTokVideoSearchProp
         Vídeos no TikTok
       </h3>
       <p className="mt-1 text-[11px] leading-snug text-slate-500">
-        Veja vídeos de produtos parecidos. Abre a busca do TikTok numa nova aba.
+        Veja vídeos de produtos parecidos na busca do TikTok.
       </p>
 
       {suggestions.length > 0 ? (
@@ -42,6 +77,9 @@ export default function TikTokVideoSearch({ productName }: TikTokVideoSearchProp
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={(event) => {
+                    if (!openSearch(suggestion)) event.preventDefault();
+                  }}
                   className="inline-flex items-center gap-1.5 rounded-sm border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 transition hover:border-brand-500 hover:text-brand-600"
                 >
                   {suggestion}
@@ -57,7 +95,7 @@ export default function TikTokVideoSearch({ productName }: TikTokVideoSearchProp
         className="mt-2.5 flex gap-2"
         onSubmit={(event) => {
           event.preventDefault();
-          if (queryUrl) window.open(queryUrl, "_blank", "noopener,noreferrer");
+          if (queryUrl && openSearch(query)) window.open(queryUrl, "_blank", "noopener,noreferrer");
         }}
       >
         <label htmlFor="tiktok-query" className="sr-only">
@@ -80,6 +118,12 @@ export default function TikTokVideoSearch({ productName }: TikTokVideoSearchProp
           BUSCAR
         </button>
       </form>
+
+      <p aria-live="polite" className="mt-1.5 min-h-4 text-[11px] leading-snug text-slate-500">
+        {copiedQuery
+          ? `"${copiedQuery}" copiado. Se o TikTok abrir sem a busca, cole na lupa dele.`
+          : null}
+      </p>
     </section>
   );
 }
